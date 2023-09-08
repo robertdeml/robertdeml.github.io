@@ -22,19 +22,52 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
       }
 
       .image-container img {
         max-width: 100%;
         height: auto;
       }
+
+      .marker {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
     </style>
   </head>
   <body>
-    <div class="section">
-      <div class="image-container">
-        <img src="your-image.jpg" alt="Your Image" />
+    <div class="section" id="section">
+      <div class="image-container" id="image-container">
+        <img src="your-image.jpg" alt="Your Image" id="image" />
       </div>
     </div>
+
+    <script>
+      // Get the image element and container
+      const section = document.getElementById("section");
+      const image = document.getElementById("image");
+      const imageContainer = document.getElementById("image-container");
+
+      // Add a click event listener to the image
+      image.addEventListener("click", function (event) {
+        // Create a marker element
+        const marker = document.createElement("div");
+        marker.className = "marker";
+
+        // Set the marker's position based on click coordinates
+        const mouseX = event.clientX + section.scrollLeft;
+        const mouseY = event.clientY + section.scrollTop;
+        marker.style.left = mouseX + "px";
+        marker.style.top = mouseY + "px";
+
+        // Append the marker to the container
+        imageContainer.appendChild(marker);
+      });
+    </script>
   </body>
 </html>
