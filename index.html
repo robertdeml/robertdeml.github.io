@@ -67,20 +67,51 @@
   <div class="point-data">
     <div>Pt1: <span id="ref1">ref1</span></div>
     <div>Pt2: <span id="ref2">ref2</span></div>
+    <div>Pt2: <span id="ref3"></span></div>
     <div>Pos: <span id="current-position">ref3</span></div>
   </div>
 
   <script>
+
     let gpsToMapRotation;
     let gpsToMapScale;
     let gpsLatitude;
     let gpsLongitude;
     let mapX;
     let mapY;
+    let currentPositionInterval;
 
     // delta = 0.0026551, 0.00016
     // rotation = -1.648076382, 
     // scale = 62046.306
+    // const a = {
+    //   dataset: {
+    //     latitude: .9299554,
+    //     longitude: .4967629,
+    //     x: 100,
+    //     y: 100,
+    //   }
+    // };
+    // const b = {
+    //   dataset: {
+    //     latitude: .9326105,
+    //     longitude: .49692,
+    //     x: 200,
+    //     y: 100,
+    //   }
+    // };
+    function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement function
+      var R = 6378.137; // Radius of earth in KM
+      var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+      var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      var d = R * c;
+      return d * 1000; // meters
+    }
+
     const saveTransformations = (a, b) => {
       const gpsAngle = Math.atan2(b.dataset.latitude - a.dataset.latitude, b.dataset.longitude - a.dataset.longitude);
       const mapAngle = Math.atan2(b.dataset.y - a.dataset.y, b.dataset.x - a.dataset.x);
@@ -90,6 +121,8 @@
       const mapDistance = Math.sqrt(Math.pow(b.dataset.y - a.dataset.y, 2) + Math.pow(b.dataset.x - a.dataset.x, 2));
       gpsToMapScale = mapDistance / gpsDistance;
 
+      const gpsDistanceMeters = measure(b.dataset.latitude, b.dataset.longitude, a.dataset.latitude, a.dataset.longitude);
+
       if (!isFinite(gpsToMapScale)) {
         gpsToMapScale = 1;
       }
@@ -98,13 +131,19 @@
       gpsLongitude = a.dataset.longitude;
       mapX = a.dataset.x;
       mapY = a.dataset.y;
+
+      document.querySelector('#ref1').innerHTML = `gps:${a.dataset.longitude}, ${a.dataset.latitude}<br>acc: ${a.dataset.accuracy} <br>map: ${a.dataset.x},${a.dataset.y}`;
+      document.querySelector('#ref2').innerHTML = `gps:${b.dataset.longitude}, ${b.dataset.latitude}<br>acc: ${b.dataset.accuracy} <br>map: ${b.dataset.x},${b.dataset.y}`;
+      document.querySelector('#ref3').innerHTML = `gpsDist:${gpsDistance}<br>gpsDist2: ${gpsDistanceMeters}<br>mappDist: ${mapDistance} <br>scale: ${gpsToMapScale}`;
     };
 
     const plotCurrentPosition = () => {
-      console.log("plotting position...");
       const locationSuccess = (position) => {
         // Create a marker element
-        const marker = document.createElement("div");
+        let marker = document.querySelector(".current-position-marker");
+        if (!marker) {
+          marker = document.createElement("div");
+        }
         marker.className = "current-position-marker";
 
         const latitude = position.coords.latitude;
@@ -112,7 +151,6 @@
         console.log("position: ", latitude, longitude);
         marker.dataset.latitude = latitude;
         marker.dataset.longitude = longitude;
-        document.querySelector('#current-position').innerHTML = `${latitude}, ${longitude}, ${gpsToMapRotation}, ${gpsToMapScale}`;
 
         // Set the marker's position based on rotation and scale
         const translateX = longitude - gpsLongitude;
@@ -128,6 +166,8 @@
         marker.style.top = y + "px";
         marker.dataset.x = x;
         marker.dataset.y = y;
+
+        document.querySelector('#current-position').innerHTML = `${longitude}, ${latitude}, ${x}, ${y}`;
 
         // Append the marker to the container
         imageContainer.appendChild(marker);
@@ -153,8 +193,13 @@
     const image = document.getElementById("image");
     const imageContainer = document.getElementById("image-container");
 
-    // Add a click event listener to the image
-    image.addEventListener("click", function (event) {
+    const removeAllBut1Marker = () => {
+      if (imageContainer.querySelectorAll('.marker').length > 1) {
+        imageContainer.querySelectorAll('.marker')[0].remove();
+      }
+    };
+
+    const appendNewPoint = (event) => {
       // Create a marker element
       const marker = document.createElement("div");
       marker.className = "marker";
@@ -171,27 +216,43 @@
 
       // Append the marker to the container
       imageContainer.appendChild(marker);
+      return marker.id;
+    };
+
+    // Add a click event listener to the image
+    image.addEventListener("click", function (event) {
+      /**
+       * Click -> 
+       *          Whlie there is more than 1 point
+       *            Remove the first point
+       *          Append a new point
+       *          if there are 2 points
+       *            Calculate translation constants
+       *            Start Interval if not started
+      */
+      removeAllBut1Marker();
+
+      const markerId = appendNewPoint(event);
 
       const locationSuccess = (markerId) => (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         const accuracy = position.coords.accuracy;
 
-        console.log("position: ", latitude, longitude);
-        const marker = document.getElementById(markerId);
+        const marker = imageContainer.querySelector(`#${markerId}`);
+        if (!marker) return;
         marker.dataset.latitude = latitude;
         marker.dataset.longitude = longitude;
         marker.dataset.accuracy = accuracy;
 
-        if (document.querySelectorAll(".marker").length === 2) {
-          const a = document.querySelectorAll('.marker')[0];
-          const b = document.querySelectorAll('.marker')[1];
-
-          document.querySelector('#ref1').innerHTML = `${a.dataset.latitude}, ${a.dataset.longitude}, ${a.dataset.accuracy}`;
-          document.querySelector('#ref2').innerHTML = `${b.dataset.latitude}, ${b.dataset.longitude}, ${b.dataset.accuracy}`;
+        if (imageContainer.querySelectorAll(".marker").length === 2) {
+          const a = imageContainer.querySelectorAll('.marker')[0];
+          const b = imageContainer.querySelectorAll('.marker')[1];
 
           saveTransformations(a, b);
-          setInterval(plotCurrentPosition, 5 * 1000);
+          if (currentPositionInterval == null) {
+            currentPositionInterval = setInterval(plotCurrentPosition, 5 * 1000);
+          }
         }
       }
       const locationError = () => {
@@ -201,8 +262,7 @@
       if (!navigator.geolocation) {
         console.log("Geolocation is not supported by your browser");
       } else {
-        console.log("Locating…");
-        navigator.geolocation.getCurrentPosition(locationSuccess(marker.id), locationError);
+        navigator.geolocation.getCurrentPosition(locationSuccess(markerId), locationError);
       }
     });
   </script>
