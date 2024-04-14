@@ -109,7 +109,7 @@
         console.log("position: ", latitude, longitude);
         marker.dataset.latitude = latitude;
         marker.dataset.longitude = longitude;
-        document.querySelector('#current-position').innerHTML = `${latitude}, ${longitude}`;
+        document.querySelector('#current-position').innerHTML = `${latitude}, ${longitude}, ${gpsToMapRotation}, ${gpsToMapScale}`;
 
         // Set the marker's position based on rotation and scale
         const translateX = longitude - gpsLongitude;
@@ -185,7 +185,7 @@
           document.querySelector('#ref2').innerHTML = `${b.dataset.latitude}, ${b.dataset.longitude}`;
 
           saveTransformations(a, b);
-          setInterval(plotCurrentPosition, 10 * 1000);
+          setInterval(plotCurrentPosition, 5 * 1000);
         }
       }
       const locationError = () => {
