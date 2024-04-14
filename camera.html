@@ -25,11 +25,21 @@
     <script>
         var imageCapture;
 
-        function onGetUserMediaButtonClick() {
+        async function onGetUserMediaButtonClick() {
             navigator.mediaDevices.getUserMedia({ video: true })
-                .then(mediaStream => {
+                .then(async mediaStream => {
                     // document.querySelector('video').srcObject = mediaStream;
                     document.querySelector('#takePhotoButton').disabled = false;
+
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    console.log("devices:", devices);
+
+                    devices.forEach(dev => {
+                        const div = document.createElement('div');
+                        div.innerText = `${dev.label} ${dev.kind}`;
+                        document.getElementById('results').appendChild(div);
+                    });
+
 
                     const track = mediaStream.getVideoTracks()[0];
                     imageCapture = new ImageCapture(track);
