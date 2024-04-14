@@ -69,6 +69,22 @@
 
       // Append the marker to the container
       imageContainer.appendChild(marker);
+
+      const locationSuccess = (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        console.log("position: ", latitude, longitude);
+      }
+      const locationError = () => {
+        console.log('error getting location.');
+      }
+
+      if (!navigator.geolocation) {
+        console.log("Geolocation is not supported by your browser");
+      } else {
+        console.log("Locating…");
+        navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
+      }
     });
   </script>
 </body>
