@@ -137,53 +137,53 @@
       document.querySelector('#ref3').innerHTML = `gpsDist:${gpsDistance}<br>gpsDist2: ${gpsDistanceMeters}<br>mappDist: ${mapDistance} <br>scale: ${gpsToMapScale}`;
     };
 
-    const plotCurrentPosition = () => {
-      const locationSuccess = (position) => {
-        // Create a marker element
-        let marker = document.querySelector(".current-position-marker");
-        if (!marker) {
-          marker = document.createElement("div");
-        }
-        marker.className = "current-position-marker";
-
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        console.log("position: ", latitude, longitude);
-        marker.dataset.latitude = latitude;
-        marker.dataset.longitude = longitude;
-
-        // Set the marker's position based on rotation and scale
-        const translateX = longitude - gpsLongitude;
-        const translateY = latitude - gpsLatitude;
-        const rotateX = translateX * Math.cos(gpsToMapRotation);
-        const rotateY = translateY * Math.sin(gpsToMapRotation);
-        const scaleX = rotateX * gpsToMapScale;
-        const scaleY = rotateY * gpsToMapScale;
-
-        const x = scaleX + mapX;
-        const y = scaleY + mapY;
-        marker.style.left = x + "px";
-        marker.style.top = y + "px";
-        marker.dataset.x = x;
-        marker.dataset.y = y;
-
-        document.querySelector('#current-position').innerHTML = `${longitude}, ${latitude}, ${x}, ${y}`;
-
-        // Append the marker to the container
-        imageContainer.appendChild(marker);
+    // const plotCurrentPosition = () => {
+    const plotCurrentPosition = (position) => {
+      // Create a marker element
+      let marker = document.querySelector(".current-position-marker");
+      if (!marker) {
+        marker = document.createElement("div");
       }
+      marker.className = "current-position-marker";
 
-      const locationError = () => {
-        console.log('error getting location.');
-      }
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      console.log("position: ", latitude, longitude);
+      marker.dataset.latitude = latitude;
+      marker.dataset.longitude = longitude;
 
-      if (!navigator.geolocation) {
-        console.log("Geolocation is not supported by your browser");
-      } else {
-        console.log("Locating…");
-        navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
-      }
+      // Set the marker's position based on rotation and scale
+      const translateX = longitude - gpsLongitude;
+      const translateY = latitude - gpsLatitude;
+      const rotateX = translateX * Math.cos(gpsToMapRotation);
+      const rotateY = translateY * Math.sin(gpsToMapRotation);
+      const scaleX = rotateX * gpsToMapScale;
+      const scaleY = rotateY * gpsToMapScale;
+
+      const x = scaleX + mapX;
+      const y = scaleY + mapY;
+      marker.style.left = x + "px";
+      marker.style.top = y + "px";
+      marker.dataset.x = x;
+      marker.dataset.y = y;
+
+      document.querySelector('#current-position').innerHTML = `${longitude}, ${latitude}, ${x}, ${y}`;
+
+      // Append the marker to the container
+      imageContainer.appendChild(marker);
     }
+
+    //   const locationError = () => {
+    //     console.log('error getting location.');
+    //   }
+
+    //   if (!navigator.geolocation) {
+    //     console.log("Geolocation is not supported by your browser");
+    //   } else {
+    //     console.log("Locating…");
+    //     navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
+    //   }
+    // }
 
     let markerId = 0;
     const markers = [];
@@ -251,7 +251,8 @@
 
           saveTransformations(a, b);
           if (currentPositionInterval == null) {
-            currentPositionInterval = setInterval(plotCurrentPosition, 5 * 1000);
+            // currentPositionInterval = setInterval(plotCurrentPosition, 5 * 1000);
+            navigator.geolocation.watchPosition(plotCurrentPosition);
           }
         }
       }
