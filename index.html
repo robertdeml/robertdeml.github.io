@@ -75,6 +75,10 @@
       const mapDistance = Math.sqrt(Math.pow(b.dataset.y - a.dataset.y, 2) + Math.pow(b.dataset.x - a.dataset.x, 2));
       gpsToMapScale = mapDistance / gpsDistance;
 
+      if (!isFinite(gpsToMapScale)) {
+        gpsToMapScale = 1;
+      }
+
       gpsLatitude = a.dataset.latitude;
       gpsLongitude = a.dataset.longitude;
       mapX = a.dataset.x;
@@ -96,7 +100,7 @@
 
         // Set the marker's position based on rotation and scale
         const translateX = longitude - gpsLongitude;
-        const translatY = latitude - gpsLatitude;
+        const translateY = latitude - gpsLatitude;
         const rotateX = translateX * Math.cos(gpsToMapRotation);
         const rotateY = translateY * Math.sin(gpsToMapRotation);
         const scaleX = rotateX * gpsToMapScale;
