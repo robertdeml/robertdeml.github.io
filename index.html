@@ -78,6 +78,9 @@
     let mapX;
     let mapY;
 
+    // delta = 0.0026551, 0.00016
+    // rotation = -1.648076382, 
+    // scale = 62046.306
     const saveTransformations = (a, b) => {
       const gpsAngle = Math.atan2(b.dataset.latitude - a.dataset.latitude, b.dataset.longitude - a.dataset.longitude);
       const mapAngle = Math.atan2(b.dataset.y - a.dataset.y, b.dataset.x - a.dataset.x);
@@ -172,17 +175,20 @@
       const locationSuccess = (markerId) => (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
         console.log("position: ", latitude, longitude);
         const marker = document.getElementById(markerId);
         marker.dataset.latitude = latitude;
         marker.dataset.longitude = longitude;
+        marker.dataset.accuracy = accuracy;
 
         if (document.querySelectorAll(".marker").length === 2) {
           const a = document.querySelectorAll('.marker')[0];
           const b = document.querySelectorAll('.marker')[1];
 
-          document.querySelector('#ref1').innerHTML = `${a.dataset.latitude}, ${a.dataset.longitude}`;
-          document.querySelector('#ref2').innerHTML = `${b.dataset.latitude}, ${b.dataset.longitude}`;
+          document.querySelector('#ref1').innerHTML = `${a.dataset.latitude}, ${a.dataset.longitude}, ${a.dataset.accuracy}`;
+          document.querySelector('#ref2').innerHTML = `${b.dataset.latitude}, ${b.dataset.longitude}, ${b.dataset.accuracy}`;
 
           saveTransformations(a, b);
           setInterval(plotCurrentPosition, 5 * 1000);
