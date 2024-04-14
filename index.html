@@ -50,6 +50,9 @@
   </div>
 
   <script>
+    let markerId = 0;
+    const markers = [];
+
     // Get the image element and container
     const section = document.getElementById("section");
     const image = document.getElementById("image");
@@ -66,14 +69,19 @@
       const mouseY = event.clientY + section.scrollTop;
       marker.style.left = mouseX + "px";
       marker.style.top = mouseY + "px";
+      markerId++;
+      marker.id = `marker_${markerId}`;
 
       // Append the marker to the container
       imageContainer.appendChild(marker);
 
-      const locationSuccess = (position) => {
+      const locationSuccess = (markerId) => (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         console.log("position: ", latitude, longitude);
+        const marker = document.getElementById(markerId);
+        marker.dataset.latitude = latitude;
+        marker.dataset.longitude = longitude;
       }
       const locationError = () => {
         console.log('error getting location.');
@@ -83,7 +91,7 @@
         console.log("Geolocation is not supported by your browser");
       } else {
         console.log("Locating…");
-        navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
+        navigator.geolocation.getCurrentPosition(locationSuccess(marker.id), locationError);
       }
     });
   </script>
