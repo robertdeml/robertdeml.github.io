@@ -51,7 +51,7 @@
 
     .point-data {
       position: absolute;
-      top: 0px;
+      bottom: 0px;
       left: 0px;
       color: white;
     }
@@ -65,10 +65,11 @@
     </div>
   </div>
   <div class="point-data">
-    <div>Pt1: <span id="ref1">ref1</span></div>
-    <div>Pt2: <span id="ref2">ref2</span></div>
-    <div>Pt2: <span id="ref3"></span></div>
-    <div>Pos: <span id="current-position">ref3</span></div>
+    <div>GPS: <span id="longitude"></span> <span id="latitude"></span></div>
+    <div>accuracy: <span id="accuracy"></span></div>
+    <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
+    <div>Pt2: <span id="markerBLong"></span> <span id="markerBLat"></span> <span id="markerBAcc"></span></div>
+    <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div>
   </div>
 
   <script>
@@ -113,9 +114,8 @@
       mapX = a.dataset.x;
       mapY = a.dataset.y;
 
-      // document.querySelector('#ref1').innerHTML = `gps:${a.dataset.longitude}, ${a.dataset.latitude}<br>acc: ${a.dataset.accuracy} <br>map: ${a.dataset.x},${a.dataset.y}`;
-      // document.querySelector('#ref2').innerHTML = `gps:${b.dataset.longitude}, ${b.dataset.latitude}<br>acc: ${b.dataset.accuracy} <br>map: ${b.dataset.x},${b.dataset.y}`;
-      document.querySelector('#ref3').innerHTML = `gpsDist:${gpsDistance}<br>gpsDist2: ${gpsDistanceMeters}<br>mappDist: ${mapDistance} <br>scale: ${gpsToMapScale}`;
+      document.getElementById('gpsDist').innerHTML = gpsDistanceMeters;
+      document.getElementById('mapDist').innerHTML = mapDistance;
     };
 
     // const plotCurrentPosition = () => {
@@ -147,7 +147,9 @@
       marker.dataset.x = x;
       marker.dataset.y = y;
 
-      document.querySelector('#current-position').innerHTML = `${longitude}, ${latitude}, ${x}, ${y}`;
+      document.getElementById("longitude").innerHTML = longitude;
+      document.getElementById("latitude").innerHTML = latitude;
+      document.getElementById("accuracy").innerHTML = position.coords.accuracy;
 
       // Append the marker to the container
       imageContainer.appendChild(marker);
@@ -196,7 +198,9 @@
           markerA.dataset.longitude = longitude;
           markerA.dataset.accuracy = accuracy;
 
-          document.querySelector('#ref1').innerHTML = `gps:${markerA.dataset.longitude}, ${markerA.dataset.latitude}<br>acc: ${markerA.dataset.accuracy} <br>map: ${markerA.dataset.x},${markerA.dataset.y}`;
+          document.getElementById('markerALong').innerHTML = longitude;
+          document.getElementById('markerALat').innerHTML = latitude;
+          document.getElementById('markerAAcc').innerHTML = accuracy;
         }
         else if (markerA && markerB && !markerC) {
           if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
@@ -209,7 +213,9 @@
           markerB.dataset.longitude = longitude;
           markerB.dataset.accuracy = accuracy;
 
-          document.querySelector('#ref2').innerHTML = `gps:${markerB.dataset.longitude}, ${markerB.dataset.latitude}<br>acc: ${markerB.dataset.accuracy} <br>map: ${markerB.dataset.x},${markerB.dataset.y}`;
+          document.getElementById('markerBLong').innerHTML = longitude;
+          document.getElementById('markerBLat').innerHTML = latitude;
+          document.getElementById('markerBAcc').innerHTML = accuracy;
 
           saveTransformations(markerA, markerB);
 
@@ -228,8 +234,13 @@
           markerC.dataset.longitude = longitude;
           markerC.dataset.accuracy = accuracy;
 
-          document.querySelector('#ref1').innerHTML = `gps:${markerB.dataset.longitude}, ${markerB.dataset.latitude}<br>acc: ${markerB.dataset.accuracy} <br>map: ${markerB.dataset.x},${markerB.dataset.y}`;
-          document.querySelector('#ref2').innerHTML = `gps:${markerC.dataset.longitude}, ${markerC.dataset.latitude}<br>acc: ${markerC.dataset.accuracy} <br>map: ${markerC.dataset.x},${markerC.dataset.y}`;
+          document.getElementById('markerALong').innerHTML = markerB.dataset.longitude;
+          document.getElementById('markerALat').innerHTML = markerB.dataset.latitude;
+          document.getElementById('markerAAcc').innerHTML = markerB.dataset.accuracy;
+
+          document.getElementById('markerBLong').innerHTML = markerC.dataset.longitude;
+          document.getElementById('markerBLat').innerHTML = markerC.dataset.latitude;
+          document.getElementById('markerBAcc').innerHTML = markerC.dataset.accuracy;
 
           saveTransformations(markerB, markerC);
         }
