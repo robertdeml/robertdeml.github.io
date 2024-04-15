@@ -81,25 +81,6 @@
     let mapY;
     let currentPositionInterval;
 
-    // delta = 0.0026551, 0.00016
-    // rotation = -1.648076382, 
-    // scale = 62046.306
-    // const a = {
-    //   dataset: {
-    //     latitude: .9299554,
-    //     longitude: .4967629,
-    //     x: 100,
-    //     y: 100,
-    //   }
-    // };
-    // const b = {
-    //   dataset: {
-    //     latitude: .9326105,
-    //     longitude: .49692,
-    //     x: 200,
-    //     y: 100,
-    //   }
-    // };
     function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement function
       var R = 6378.137; // Radius of earth in KM
       var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
@@ -148,7 +129,6 @@
 
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      console.log("position: ", latitude, longitude);
       marker.dataset.latitude = latitude;
       marker.dataset.longitude = longitude;
 
@@ -173,31 +153,12 @@
       imageContainer.appendChild(marker);
     }
 
-    //   const locationError = () => {
-    //     console.log('error getting location.');
-    //   }
-
-    //   if (!navigator.geolocation) {
-    //     console.log("Geolocation is not supported by your browser");
-    //   } else {
-    //     console.log("Locating…");
-    //     navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
-    //   }
-    // }
-
     let markerId = 0;
-    const markers = [];
 
     // Get the image element and container
     const section = document.getElementById("section");
     const image = document.getElementById("image");
     const imageContainer = document.getElementById("image-container");
-
-    const removeAllBut1Marker = () => {
-      if (imageContainer.querySelectorAll('.marker').length > 1) {
-        imageContainer.querySelectorAll('.marker')[0].remove();
-      }
-    };
 
     const appendNewPoint = (event) => {
       // Create a marker element
@@ -221,39 +182,48 @@
 
     // Add a click event listener to the image
     image.addEventListener("click", function (event) {
-      /**
-       * Click -> 
-       *          Whlie there is more than 1 point
-       *            Remove the first point
-       *          Append a new point
-       *          if there are 2 points
-       *            Calculate translation constants
-       *            Start Interval if not started
-      */
-      removeAllBut1Marker();
-
       const markerId = appendNewPoint(event);
 
-      const locationSuccess = (markerId) => (position) => {
+      const locationSuccess = (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         const accuracy = position.coords.accuracy;
 
-        const marker = imageContainer.querySelector(`#${markerId}`);
-        if (!marker) return;
-        marker.dataset.latitude = latitude;
-        marker.dataset.longitude = longitude;
-        marker.dataset.accuracy = accuracy;
-
-        if (imageContainer.querySelectorAll(".marker").length === 2) {
-          const a = imageContainer.querySelectorAll('.marker')[0];
-          const b = imageContainer.querySelectorAll('.marker')[1];
-
-          saveTransformations(a, b);
-          if (currentPositionInterval == null) {
-            // currentPositionInterval = setInterval(plotCurrentPosition, 5 * 1000);
-            navigator.geolocation.watchPosition(plotCurrentPosition);
+        const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
+        if (markerA && !markerB && !markerC) {
+          // first marker
+          markerA.dataset.latitude = latitude;
+          markerA.dataset.longitude = longitude;
+          markerA.dataset.accuracy = accuracy;
+        }
+        else if (markerA && markerB && !markerC) {
+          if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < accuracy + +markerA.dataset.accuracy) {
+            markerB.remove();
+            return;
           }
+
+          // second marker
+          markerB.dataset.latitude = latitude;
+          markerB.dataset.longitude = longitude;
+          markerB.dataset.accuracy = accuracy;
+
+          saveTransformations(markerA, markerB);
+          navigator.geolocation.watchPosition(plotCurrentPosition);
+        }
+        else {
+          if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < accuracy + +markerB.dataset.accuracy) {
+            markerC.remove();
+            return;
+          }
+
+          // replace first marker
+          markerA.remove();
+
+          markerC.dataset.latitude = latitude;
+          markerC.dataset.longitude = longitude;
+          markerC.dataset.accuracy = accuracy;
+
+          saveTransformations(markerB, markerC);
         }
       }
       const locationError = () => {
@@ -263,7 +233,7 @@
       if (!navigator.geolocation) {
         console.log("Geolocation is not supported by your browser");
       } else {
-        navigator.geolocation.getCurrentPosition(locationSuccess(markerId), locationError);
+        navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
       }
     });
   </script>
