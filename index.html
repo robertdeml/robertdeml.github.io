@@ -65,6 +65,7 @@
     </div>
   </div>
   <div class="point-data">
+    <div>count: <span id="posCount"></span></div>
     <div>GPS: <span id="longitude"></span> <span id="latitude"></span></div>
     <div>accuracy: <span id="accuracy"></span></div>
     <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
@@ -118,7 +119,10 @@
       document.getElementById('mapDist').innerHTML = mapDistance;
     };
 
+    let positionCount = 0;
     const plotCurrentPosition = (position) => {
+      document.getElementById('posCount').innerHTML = positionCount++;
+
       // Create a marker element
       let marker = document.querySelector(".current-position-marker");
       const markerCreated = !marker;
