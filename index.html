@@ -197,7 +197,7 @@
           markerA.dataset.accuracy = accuracy;
         }
         else if (markerA && markerB && !markerC) {
-          if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 1) { // accuracy + +markerA.dataset.accuracy) {
+          if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
             markerB.remove();
             return;
           }
@@ -211,7 +211,7 @@
           navigator.geolocation.watchPosition(plotCurrentPosition);
         }
         else {
-          if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 1) { // accuracy + +markerB.dataset.accuracy) {
+          if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 0) { // accuracy + +markerB.dataset.accuracy) {
             markerC.remove();
             return;
           }
