@@ -118,10 +118,10 @@
       document.getElementById('mapDist').innerHTML = mapDistance;
     };
 
-    // const plotCurrentPosition = () => {
     const plotCurrentPosition = (position) => {
       // Create a marker element
       let marker = document.querySelector(".current-position-marker");
+      const markerCreated = !marker;
       if (!marker) {
         marker = document.createElement("div");
       }
@@ -129,6 +129,11 @@
 
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
+
+      document.getElementById("longitude").innerHTML = longitude;
+      document.getElementById("latitude").innerHTML = latitude;
+      document.getElementById("accuracy").innerHTML = position.coords.accuracy;
+
       marker.dataset.latitude = latitude;
       marker.dataset.longitude = longitude;
 
@@ -147,12 +152,10 @@
       marker.dataset.x = x;
       marker.dataset.y = y;
 
-      document.getElementById("longitude").innerHTML = longitude;
-      document.getElementById("latitude").innerHTML = latitude;
-      document.getElementById("accuracy").innerHTML = position.coords.accuracy;
-
       // Append the marker to the container
-      imageContainer.appendChild(marker);
+      if (markerCreated) {
+        imageContainer.appendChild(marker);
+      }
     }
 
     let markerId = 0;
@@ -219,7 +222,6 @@
 
           saveTransformations(markerA, markerB);
 
-          navigator.geolocation.watchPosition(plotCurrentPosition);
         }
         else {
           if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 0) { // accuracy + +markerB.dataset.accuracy) {
@@ -255,6 +257,12 @@
         navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
       }
     });
+
+    if (!navigator.geolocation) {
+      console.log("Geolocation is not supported by your browser");
+    } else {
+      navigator.geolocation.watchPosition(plotCurrentPosition);
+    }
   </script>
 </body>
 
