@@ -158,8 +158,8 @@
       const scaleX = rotateX * gpsToMapScale;
       const scaleY = rotateY * gpsToMapScale;
 
-      const mapX = scaleX + mapX;
-      const mapY = scaleY + mapY;
+      const x = scaleX + mapX;
+      const y = scaleY + mapY;
       marker.style.left = mapX + "px";
       marker.style.top = mapY + "px";
       marker.dataset.x = mapX;
@@ -171,8 +171,8 @@
       document.getElementById("rotateY").innerHTML = rotateY;
       document.getElementById("scaleX").innerHTML = scaleX;
       document.getElementById("scaleY").innerHTML = scaleY;
-      document.getElementById("mapX").innerHTML = mapX;
-      document.getElementById("mapY").innerHTML = mapY;
+      document.getElementById("mapX").innerHTML = x;
+      document.getElementById("mapY").innerHTML = y;
 
       // Append the marker to the container
       if (markerCreated) {
