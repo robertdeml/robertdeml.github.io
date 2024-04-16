@@ -71,6 +71,15 @@
     <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
     <div>Pt2: <span id="markerBLong"></span> <span id="markerBLat"></span> <span id="markerBAcc"></span></div>
     <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div>
+
+    <div>translateX: <span id="translateX"></span></div>
+    <div>translateY: <span id="translateY"></span></div>
+    <div>rotateX: <span id="rotateX"></span></div>
+    <div>rotateY: <span id="rotateY"></span></div>
+    <div>scaleX: <span id="scaleX"></span></div>
+    <div>scaleY: <span id="scaleY"></span></div>
+    <div>mapX: <span id="mapX"></span></div>
+    <div>mapY: <span id="mapY"></span></div>
   </div>
 
   <script>
@@ -149,12 +158,21 @@
       const scaleX = rotateX * gpsToMapScale;
       const scaleY = rotateY * gpsToMapScale;
 
-      const x = scaleX + mapX;
-      const y = scaleY + mapY;
-      marker.style.left = x + "px";
-      marker.style.top = y + "px";
-      marker.dataset.x = x;
-      marker.dataset.y = y;
+      const mapX = scaleX + mapX;
+      const mapY = scaleY + mapY;
+      marker.style.left = mapX + "px";
+      marker.style.top = mapY + "px";
+      marker.dataset.x = mapX;
+      marker.dataset.y = mapY;
+
+      document.getElementById("translateX").innerHTML = translateX;
+      document.getElementById("translateY").innerHTML = translateY;
+      document.getElementById("rotateX").innerHTML = rotateX;
+      document.getElementById("rotateY").innerHTML = rotateY;
+      document.getElementById("scaleX").innerHTML = scaleX;
+      document.getElementById("scaleY").innerHTML = scaleY;
+      document.getElementById("mapX").innerHTML = mapX;
+      document.getElementById("mapY").innerHTML = mapY;
 
       // Append the marker to the container
       if (markerCreated) {
