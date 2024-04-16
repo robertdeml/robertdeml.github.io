@@ -108,7 +108,7 @@
     const saveTransformations = (a, b) => {
       const gpsAngle = Math.atan2(b.dataset.latitude - a.dataset.latitude, b.dataset.longitude - a.dataset.longitude);
       const mapAngle = Math.atan2(b.dataset.y - a.dataset.y, b.dataset.x - a.dataset.x);
-      gpsToMapRotation = mapAngle - gpsAngle;
+      gpsToMapRotation = gpsAngle - mapAngle;
 
       const gpsDistance = Math.sqrt(Math.pow(b.dataset.latitude - a.dataset.latitude, 2) + Math.pow(b.dataset.longitude - a.dataset.longitude, 2));
       const mapDistance = Math.sqrt(Math.pow(b.dataset.y - a.dataset.y, 2) + Math.pow(b.dataset.x - a.dataset.x, 2));
