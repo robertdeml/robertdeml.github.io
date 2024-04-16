@@ -125,7 +125,7 @@
       mapX = a.dataset.x;
       mapY = a.dataset.y;
 
-      document.getElementById('gpsDist').innerHTML = mapDistance.toFixed(4);
+      document.getElementById('gpsDist').innerHTML = gpsDistance.toFixed(4);
       document.getElementById('mapDist').innerHTML = mapDistance.toFixed(2);
       document.getElementById('scale').innerHTML = gpsToMapScale.toFixed(2);
     };
@@ -153,13 +153,13 @@
       marker.dataset.longitude = longitude;
 
       // Set the marker's position based on rotation and scale
-      const translateX = longitude - gpsLongitude;
+      const translateX = longitude - gpsLongitude; // translate to a known point
       const translateY = latitude - gpsLatitude;
-      const rotateX = translateX * Math.cos(gpsToMapRotation);
-      const rotateY = translateY * Math.sin(gpsToMapRotation);
-      const scaleX = rotateX * gpsToMapScale;
+      const rotateX = translateX * Math.cos(gpsToMapRotation) - translateY * Math.sin(gpsToMapRotation); // rotate the point
+      const rotateY = translateY * Math.cos(gpsToMapRotation) + translateX * Math.sin(gpsToMapRotation);
+      const scaleX = rotateX * gpsToMapScale; // scale to map units
       const scaleY = rotateY * gpsToMapScale;
-      const x = scaleX + mapX;
+      const x = scaleX + mapX; // translate to map coordinates
       const y = scaleY + mapY;
 
       marker.style.left = x + "px";
