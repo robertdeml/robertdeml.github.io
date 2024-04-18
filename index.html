@@ -92,6 +92,7 @@
     let mapOriginX;
     let mapOriginY;
     let currentPositionInterval;
+    // let mapHeight;
 
     function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement function
       var R = 6378.137; // Radius of earth in KM
@@ -106,7 +107,9 @@
     }
 
     const saveTransformations = (a, b) => {
+      // mapHeight = document.getElementById('image-container').getBoundingClientRect().height;
       const gpsAngle = Math.atan2(b.dataset.latitude - a.dataset.latitude, b.dataset.longitude - a.dataset.longitude);
+      // const mapAngle = Math.atan2(mapHeight - (b.dataset.y - a.dataset.y), b.dataset.x - a.dataset.x);
       const mapAngle = Math.atan2(-b.dataset.y + a.dataset.y, b.dataset.x - a.dataset.x);
       gpsToMapRotation = mapAngle - gpsAngle;
 
@@ -160,6 +163,7 @@
       const scaleX = rotateX * gpsToMapScale; // scale to map units
       const scaleY = rotateY * gpsToMapScale;
       const x = scaleX + mapOriginX; // translate to map coordinates
+      // const y = mapHeight - (scaleY + mapOriginY);
       const y = scaleY + mapOriginY;
 
       marker.style.left = x + "px";
