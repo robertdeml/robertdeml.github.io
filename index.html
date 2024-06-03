@@ -70,17 +70,18 @@
     <div>accuracy: <span id="accuracy"></span></div>
     <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
     <div>Pt2: <span id="markerBLong"></span> <span id="markerBLat"></span> <span id="markerBAcc"></span></div>
-    <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div>
-    <div>Scale: <span id="scale"></span></div>
+    <!-- <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div> -->
+    <!-- <div>Scale: <span id="scale"></span></div> -->
 
-    <div>translateX: <span id="translateX"></span></div>
-    <div>translateY: <span id="translateY"></span></div>
-    <div>rotateX: <span id="rotateX"></span></div>
-    <div>rotateY: <span id="rotateY"></span></div>
+    <!-- <div>translateX: <span id="translateX"></span></div> -->
+    <!-- <div>translateY: <span id="translateY"></span></div> -->
+    <!-- <div>rotateX: <span id="rotateX"></span></div> -->
+    <!-- <div>rotateY: <span id="rotateY"></span></div> -->
     <div>scaleX: <span id="scaleX"></span></div>
     <div>scaleY: <span id="scaleY"></span></div>
     <div>mapX: <span id="mapX"></span></div>
     <div>mapY: <span id="mapY"></span></div>
+    <div>map angle: <span id="map-angle"></span></div>
   </div>
 
   <script>
@@ -131,6 +132,7 @@
       document.getElementById('gpsDist').innerHTML = gpsDistance.toFixed(4);
       document.getElementById('mapDist').innerHTML = mapDistance.toFixed(2);
       document.getElementById('scale').innerHTML = gpsToMapScale.toFixed(2);
+      document.getElementById('map-angle').innerHTML = mapAngle.toFixed(2);
     };
 
     let positionCount = 0;
