@@ -82,8 +82,8 @@
     <div>mapX: <span id="mapX"></span></div>
     <div>mapY: <span id="mapY"></span></div>
     <div>map angle: <span id="map-angle"></span></div>
-  </div>
- -->
+  </div> -->
+
   <script>
 
     let gpsToMapRotation;
@@ -236,9 +236,9 @@
           markerA.dataset.longitude = +longitude;
           markerA.dataset.accuracy = +accuracy;
 
-          document.getElementById('markerALong').innerHTML = longitude.toFixed(6);
-          document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
-          document.getElementById('markerAAcc').innerHTML = accuracy.toFixed(2);
+          // document.getElementById('markerALong').innerHTML = longitude.toFixed(6);
+          // document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
+          // document.getElementById('markerAAcc').innerHTML = accuracy.toFixed(2);
         }
         else if (markerA && markerB && !markerC) {
           if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
@@ -251,9 +251,9 @@
           markerB.dataset.longitude = +longitude;
           markerB.dataset.accuracy = +accuracy;
 
-          document.getElementById('markerBLong').innerHTML = longitude.toFixed(6);
-          document.getElementById('markerBLat').innerHTML = latitude.toFixed(6);
-          document.getElementById('markerBAcc').innerHTML = accuracy.toFixed(2);
+          // document.getElementById('markerBLong').innerHTML = longitude.toFixed(6);
+          // document.getElementById('markerBLat').innerHTML = latitude.toFixed(6);
+          // document.getElementById('markerBAcc').innerHTML = accuracy.toFixed(2);
 
           saveTransformations(markerA, markerB);
 
@@ -271,13 +271,13 @@
           markerC.dataset.longitude = +longitude;
           markerC.dataset.accuracy = +accuracy;
 
-          document.getElementById('markerALong').innerHTML = Number(markerB.dataset.longitude).toFixed(6);
-          document.getElementById('markerALat').innerHTML = Number(markerB.dataset.latitude).toFixed(6);
-          document.getElementById('markerAAcc').innerHTML = Number(markerB.dataset.accuracy).toFixed(2);
+          // document.getElementById('markerALong').innerHTML = Number(markerB.dataset.longitude).toFixed(6);
+          // document.getElementById('markerALat').innerHTML = Number(markerB.dataset.latitude).toFixed(6);
+          // document.getElementById('markerAAcc').innerHTML = Number(markerB.dataset.accuracy).toFixed(2);
 
-          document.getElementById('markerBLong').innerHTML = Number(markerC.dataset.longitude).toFixed(6);
-          document.getElementById('markerBLat').innerHTML = Number(markerC.dataset.latitude).toFixed(6);
-          document.getElementById('markerBAcc').innerHTML = Number(markerC.dataset.accuracy).toFixed(2);
+          // document.getElementById('markerBLong').innerHTML = Number(markerC.dataset.longitude).toFixed(6);
+          // document.getElementById('markerBLat').innerHTML = Number(markerC.dataset.latitude).toFixed(6);
+          // document.getElementById('markerBAcc').innerHTML = Number(markerC.dataset.accuracy).toFixed(2);
 
           saveTransformations(markerB, markerC);
         }
