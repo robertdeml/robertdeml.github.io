@@ -25,8 +25,9 @@
     <script>
         var imageCapture;
 
+        // get a list of available cameras
         async function onGetUserMediaButtonClick() {
-            navigator.mediaDevices.getUserMedia({ video: true })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode:{ exact: "environment"} } } )
                 .then(async mediaStream => {
                     // document.querySelector('video').srcObject = mediaStream;
                     document.querySelector('#takePhotoButton').disabled = false;
@@ -36,7 +37,7 @@
 
                     devices.forEach(dev => {
                         const div = document.createElement('div');
-                        div.innerText = `${dev.label} ${dev.kind}`;
+                        div.innerText = `${dev.label} - ${dev.kind}`;
                         document.getElementById('results').appendChild(div);
                     });
 
@@ -44,7 +45,7 @@
                     const track = mediaStream.getVideoTracks()[0];
                     imageCapture = new ImageCapture(track);
                 })
-                .catch(error => ChromeSamples.log(error));
+                .catch(error => console.log(error));
         }
 
         function onTakePhotoButtonClick() {
