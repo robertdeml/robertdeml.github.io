@@ -171,7 +171,7 @@
       const scaleY = rotateY * gpsToMapScale;
       const x = scaleX + mapOriginX; // translate to map coordinates
       // const y = mapHeight - (scaleY + mapOriginY);
-      const y = scaleY + mapOriginY;
+      const y = scaleY - mapOriginY;
 
       marker.style.left = x + "px";
       marker.style.top = y + "px";
