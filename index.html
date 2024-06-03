@@ -70,13 +70,13 @@
     <div>accuracy: <span id="accuracy"></span></div>
     <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
     <div>Pt2: <span id="markerBLong"></span> <span id="markerBLat"></span> <span id="markerBAcc"></span></div>
-    <!-- <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div> -->
-    <!-- <div>Scale: <span id="scale"></span></div> -->
+    <div>GpsDist: <span id="gpsDist"></span> MapDist: <span id="mapDist"></span></div>
+    <div>Scale: <span id="scale"></span></div>
 
-    <!-- <div>translateX: <span id="translateX"></span></div> -->
-    <!-- <div>translateY: <span id="translateY"></span></div> -->
-    <!-- <div>rotateX: <span id="rotateX"></span></div> -->
-    <!-- <div>rotateY: <span id="rotateY"></span></div> -->
+    <div>translateX: <span id="translateX"></span></div>
+    <div>translateY: <span id="translateY"></span></div>
+    <div>rotateX: <span id="rotateX"></span></div>
+    <div>rotateY: <span id="rotateY"></span></div>
     <div>scaleX: <span id="scaleX"></span></div>
     <div>scaleY: <span id="scaleY"></span></div>
     <div>mapX: <span id="mapX"></span></div>
@@ -109,9 +109,9 @@
 
     const saveTransformations = (a, b) => {
       // mapHeight = document.getElementById('image-container').getBoundingClientRect().height;
-      const gpsAngle = Math.atan2(b.dataset.latitude - a.dataset.latitude, b.dataset.longitude - a.dataset.longitude);
+      const gpsAngle = Math.atan2(+b.dataset.latitude - +a.dataset.latitude, +b.dataset.longitude - +a.dataset.longitude);
       // const mapAngle = Math.atan2(mapHeight - (b.dataset.y - a.dataset.y), b.dataset.x - a.dataset.x);
-      const mapAngle = Math.atan2(-b.dataset.y + a.dataset.y, b.dataset.x - a.dataset.x);
+      const mapAngle = Math.atan2(-Number(b.dataset.y) + Number(a.dataset.y), b.dataset.x - a.dataset.x);
       gpsToMapRotation = mapAngle - gpsAngle;
 
       const gpsDistance = Math.sqrt(Math.pow(b.dataset.latitude - a.dataset.latitude, 2) + Math.pow(b.dataset.longitude - a.dataset.longitude, 2));
@@ -133,6 +133,11 @@
       document.getElementById('mapDist').innerHTML = mapDistance.toFixed(2);
       document.getElementById('scale').innerHTML = gpsToMapScale.toFixed(2);
       document.getElementById('map-angle').innerHTML = mapAngle.toFixed(2);
+
+      console.log(`map-angle = ${mapAngle}`);
+      console.log(`a = (${a.dataset.x},${a.dataset.y}) b = (${b.dataset.x},${b.dataset.y})`);
+      console.log(`y = ${-Number(b.dataset.y) + Number(a.dataset.y)}, x= ${b.dataset.x - a.dataset.x}`);
+      
     };
 
     let positionCount = 0;
@@ -227,9 +232,9 @@
         const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
         if (markerA && !markerB && !markerC) {
           // first marker
-          markerA.dataset.latitude = latitude;
-          markerA.dataset.longitude = longitude;
-          markerA.dataset.accuracy = accuracy;
+          markerA.dataset.latitude = +latitude;
+          markerA.dataset.longitude = +longitude;
+          markerA.dataset.accuracy = +accuracy;
 
           document.getElementById('markerALong').innerHTML = longitude.toFixed(6);
           document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
@@ -242,9 +247,9 @@
           }
 
           // second marker
-          markerB.dataset.latitude = latitude;
-          markerB.dataset.longitude = longitude;
-          markerB.dataset.accuracy = accuracy;
+          markerB.dataset.latitude = +latitude;
+          markerB.dataset.longitude = +longitude;
+          markerB.dataset.accuracy = +accuracy;
 
           document.getElementById('markerBLong').innerHTML = longitude.toFixed(6);
           document.getElementById('markerBLat').innerHTML = latitude.toFixed(6);
@@ -262,17 +267,17 @@
           // replace first marker
           markerA.remove();
 
-          markerC.dataset.latitude = latitude;
-          markerC.dataset.longitude = longitude;
-          markerC.dataset.accuracy = accuracy;
+          markerC.dataset.latitude = +latitude;
+          markerC.dataset.longitude = +longitude;
+          markerC.dataset.accuracy = +accuracy;
 
-          document.getElementById('markerALong').innerHTML = markerB.dataset.longitude.toFixed(6);
-          document.getElementById('markerALat').innerHTML = markerB.dataset.latitude.toFixed(6);
-          document.getElementById('markerAAcc').innerHTML = markerB.dataset.accuracy.toFixed(2);
+          document.getElementById('markerALong').innerHTML = Number(markerB.dataset.longitude).toFixed(6);
+          document.getElementById('markerALat').innerHTML = Number(markerB.dataset.latitude).toFixed(6);
+          document.getElementById('markerAAcc').innerHTML = Number(markerB.dataset.accuracy).toFixed(2);
 
-          document.getElementById('markerBLong').innerHTML = markerC.dataset.longitude.toFixed(6);
-          document.getElementById('markerBLat').innerHTML = markerC.dataset.latitude.toFixed(6);
-          document.getElementById('markerBAcc').innerHTML = markerC.dataset.accuracy.toFixed(2);
+          document.getElementById('markerBLong').innerHTML = Number(markerC.dataset.longitude).toFixed(6);
+          document.getElementById('markerBLat').innerHTML = Number(markerC.dataset.latitude).toFixed(6);
+          document.getElementById('markerBAcc').innerHTML = Number(markerC.dataset.accuracy).toFixed(2);
 
           saveTransformations(markerB, markerC);
         }
