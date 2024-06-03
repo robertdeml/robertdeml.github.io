@@ -11,26 +11,33 @@
 
 <body>
     <div id="results">
-        <div>
+        <!-- <div>
             <video autoplay="" width="0" , height="0"></video>
             <button id="getUserMediaButton">Get User Media</button>
         </div>
-
+-->
         <div>
             <canvas id="takePhotoCanvas"></canvas>
-            <button id="takePhotoButton" disabled="">Take Photo</button>
-        </div>
+            <!-- <button id="takePhotoButton" disabled="">Take Photo</button> -->
+        </div> 
+        <button id="captureMap">CaptureMap</button>
     </div>
 
     <script>
         var imageCapture;
 
+        async function onCaptureMap() {
+            await onGetUserMediaButtonClick();
+            await onTakePhotoButtonClick();
+        }
+
         // get a list of available cameras
         async function onGetUserMediaButtonClick() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode:{ exact: "environment"} } } )
+            // return navigator.mediaDevices.getUserMedia({ video: true } )
                 .then(async mediaStream => {
                     // document.querySelector('video').srcObject = mediaStream;
-                    document.querySelector('#takePhotoButton').disabled = false;
+                    // document.querySelector('#takePhotoButton').disabled = false;
 
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     console.log("devices:", devices);
@@ -49,7 +56,7 @@
         }
 
         function onTakePhotoButtonClick() {
-            imageCapture.takePhoto()
+            return imageCapture.takePhoto()
                 .then(blob => createImageBitmap(blob))
                 .then(imageBitmap => {
                     const canvas = document.querySelector('#takePhotoCanvas');
@@ -58,7 +65,7 @@
 
                     drawCanvas(canvas, imageBitmap);
                 })
-                .catch(error => ChromeSamples.log(error));
+                .catch(error => console.log(error));
         }
 
         /* Utils */
@@ -74,12 +81,14 @@
                 x, y, img.width * ratio, img.height * ratio);
         }
 
-        document.querySelector('video').addEventListener('play', function () {
-            document.querySelector('#takePhotoButton').disabled = false;
-        });
+        // document.querySelector('video').addEventListener('play', function () {
+        //     document.querySelector('#takePhotoButton').disabled = false;
+        // });
 
-        document.querySelector('#getUserMediaButton').addEventListener('click', onGetUserMediaButtonClick);
-        document.querySelector('#takePhotoButton').addEventListener('click', onTakePhotoButtonClick);
+        // document.querySelector('#getUserMediaButton').addEventListener('click', onGetUserMediaButtonClick);
+        // document.querySelector('#takePhotoButton').addEventListener('click', onTakePhotoButtonClick);
+
+        document.getElementById('captureMap').addEventListener('click', onCaptureMap);
 
     </script>
 </body>
