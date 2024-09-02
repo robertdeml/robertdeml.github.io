@@ -152,8 +152,7 @@
       }
       marker.className = "current-position-marker";
 
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
+      const { latitude, longitude} = position.coords.latitude;
 
       // document.getElementById("longitude").innerHTML = longitude.toFixed(6);
       // document.getElementById("latitude").innerHTML = latitude.toFixed(6);
@@ -200,14 +199,14 @@
     const image = document.getElementById("image");
     const imageContainer = document.getElementById("image-container");
 
-    const appendNewPoint = (event) => {
+    const appendNewPoint = (clientX, clientY) => {
       // Create a marker element
       const marker = document.createElement("div");
       marker.className = "marker";
 
       // Set the marker's position based on click coordinates
-      const mouseX = event.clientX + section.scrollLeft;
-      const mouseY = event.clientY + section.scrollTop;
+      const mouseX = clientX + section.scrollLeft;
+      const mouseY = clientY + section.scrollTop;
       marker.style.left = mouseX + "px";
       marker.style.top = mouseY + "px";
       marker.dataset.x = mouseX;
@@ -220,16 +219,15 @@
       return marker.id;
     };
 
-    // Add a click event listener to the image
-    image.addEventListener("click", function (event) {
-      const markerId = appendNewPoint(event);
+    const plotPoint = (clientX, clientY) =>{
+      const markerId = appendNewPoint(clientX, clientY);
 
       const locationSuccess = (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
+        const {latitude, longitude, accuracy} = position.coords;
 
         const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
+
+        // very first marker
         if (markerA && !markerB && !markerC) {
           // first marker
           markerA.dataset.latitude = +latitude;
@@ -240,6 +238,7 @@
           // document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
           // document.getElementById('markerAAcc').innerHTML = accuracy.toFixed(2);
         }
+        // 2nd marker
         else if (markerA && markerB && !markerC) {
           if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
             markerB.remove();
@@ -258,6 +257,7 @@
           saveTransformations(markerA, markerB);
 
         }
+        // 3rd marker.  Replace the first
         else {
           if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 0) { // accuracy + +markerB.dataset.accuracy) {
             markerC.remove();
@@ -296,9 +296,13 @@
         };
         navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
       }
-    });
+    };
 
-    if (!navigator.geolocation) {
+    image.addEventListener("click", function (event) {
+      plotPoint(event.clientX, event.clientY);
+    }
+
+    if( !navigator.geolocation ) {
       console.log("Geolocation is not supported by your browser");
     } else {
       const options = {
@@ -314,6 +318,12 @@
 
       navigator.geolocation.watchPosition(plotCurrentPosition, error, options);
     }
+
+    document.addEventListener('keydown', (e) => {
+      switch(e.key){
+        case 'a'
+      }
+    })
   </script>
 </body>
 
