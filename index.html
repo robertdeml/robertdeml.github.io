@@ -300,7 +300,7 @@
 
     image.addEventListener("click", function (event) {
       plotPoint(event.clientX, event.clientY);
-    }
+    });
 
     if( !navigator.geolocation ) {
       console.log("Geolocation is not supported by your browser");
@@ -321,9 +321,10 @@
 
     document.addEventListener('keydown', (e) => {
       switch(e.key){
-        case 'a'
+        case 'a':
+          break;
       }
-    })
+    });
   </script>
 </body>
 
