@@ -64,7 +64,7 @@
       <img src="your-image.JPG" alt="Your Image" id="image" />
     </div>
   </div>
-  <!-- <div class="point-data">
+  <div class="point-data">
     <div>count: <span id="posCount"></span></div>
     <div>GPS: <span id="longitude"></span> <span id="latitude"></span></div>
     <div>accuracy: <span id="accuracy"></span></div>
@@ -82,7 +82,7 @@
     <div>mapX: <span id="mapX"></span></div>
     <div>mapY: <span id="mapY"></span></div>
     <div>map angle: <span id="map-angle"></span></div>
-  </div> -->
+  </div>
 
   <script>
 
@@ -142,7 +142,7 @@
 
     let positionCount = 0;
     const plotCurrentPosition = (position) => {
-      // document.getElementById('posCount').innerHTML = positionCount++;
+      document.getElementById('posCount').innerHTML = positionCount++;
 
       // Create a marker element
       let marker = document.querySelector(".current-position-marker");
@@ -219,72 +219,82 @@
       return marker.id;
     };
 
-    const plotPoint = (clientX, clientY) =>{
+    const plotPoint = (clientX, clientY, coords) =>{
       const markerId = appendNewPoint(clientX, clientY);
 
-      const locationSuccess = (position) => {
-        const {latitude, longitude, accuracy} = position.coords;
+      const {latitude, longitude, accuracy} = coords;
 
-        const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
+      // find up to 3 markers
+      const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
 
-        // very first marker
-        if (markerA && !markerB && !markerC) {
-          // first marker
-          markerA.dataset.latitude = +latitude;
-          markerA.dataset.longitude = +longitude;
-          markerA.dataset.accuracy = +accuracy;
+      // very first marker
+      if (markerA && !markerB && !markerC) {
+        // first marker
+        markerA.dataset.latitude = +latitude;
+        markerA.dataset.longitude = +longitude;
+        markerA.dataset.accuracy = +accuracy;
 
-          // document.getElementById('markerALong').innerHTML = longitude.toFixed(6);
-          // document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
-          // document.getElementById('markerAAcc').innerHTML = accuracy.toFixed(2);
-        }
-        // 2nd marker
-        else if (markerA && markerB && !markerC) {
-          if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
-            markerB.remove();
-            return;
-          }
-
-          // second marker
-          markerB.dataset.latitude = +latitude;
-          markerB.dataset.longitude = +longitude;
-          markerB.dataset.accuracy = +accuracy;
-
-          // document.getElementById('markerBLong').innerHTML = longitude.toFixed(6);
-          // document.getElementById('markerBLat').innerHTML = latitude.toFixed(6);
-          // document.getElementById('markerBAcc').innerHTML = accuracy.toFixed(2);
-
-          saveTransformations(markerA, markerB);
-
-        }
-        // 3rd marker.  Replace the first
-        else {
-          if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 0) { // accuracy + +markerB.dataset.accuracy) {
-            markerC.remove();
-            return;
-          }
-
-          // replace first marker
-          markerA.remove();
-
-          markerC.dataset.latitude = +latitude;
-          markerC.dataset.longitude = +longitude;
-          markerC.dataset.accuracy = +accuracy;
-
-          // document.getElementById('markerALong').innerHTML = Number(markerB.dataset.longitude).toFixed(6);
-          // document.getElementById('markerALat').innerHTML = Number(markerB.dataset.latitude).toFixed(6);
-          // document.getElementById('markerAAcc').innerHTML = Number(markerB.dataset.accuracy).toFixed(2);
-
-          // document.getElementById('markerBLong').innerHTML = Number(markerC.dataset.longitude).toFixed(6);
-          // document.getElementById('markerBLat').innerHTML = Number(markerC.dataset.latitude).toFixed(6);
-          // document.getElementById('markerBAcc').innerHTML = Number(markerC.dataset.accuracy).toFixed(2);
-
-          saveTransformations(markerB, markerC);
-        }
+        document.getElementById('markerALong').innerHTML = longitude.toFixed(6);
+        document.getElementById('markerALat').innerHTML = latitude.toFixed(6);
+        document.getElementById('markerAAcc').innerHTML = accuracy.toFixed(2);
       }
+      // 2nd marker
+      else if (markerA && markerB && !markerC) {
+        if (measure(latitude, longitude, +markerA.dataset.latitude, +markerA.dataset.longitude) < 0) { // accuracy + +markerA.dataset.accuracy) {
+          markerB.remove();
+          return;
+        }
+
+        // second marker
+        markerB.dataset.latitude = +latitude;
+        markerB.dataset.longitude = +longitude;
+        markerB.dataset.accuracy = +accuracy;
+
+        document.getElementById('markerBLong').innerHTML = longitude.toFixed(6);
+        document.getElementById('markerBLat').innerHTML = latitude.toFixed(6);
+        document.getElementById('markerBAcc').innerHTML = accuracy.toFixed(2);
+
+        saveTransformations(markerA, markerB);
+
+      }
+      // 3rd marker.  Replace the first
+      else {
+        if (measure(latitude, longitude, +markerB.dataset.latitude, +markerB.dataset.longitude) < 0) { // accuracy + +markerB.dataset.accuracy) {
+          markerC.remove();
+          return;
+        }
+
+        // replace first marker
+        markerA.remove();
+
+        markerC.dataset.latitude = +latitude;
+        markerC.dataset.longitude = +longitude;
+        markerC.dataset.accuracy = +accuracy;
+
+        document.getElementById('markerALong').innerHTML = Number(markerB.dataset.longitude).toFixed(6);
+        document.getElementById('markerALat').innerHTML = Number(markerB.dataset.latitude).toFixed(6);
+        document.getElementById('markerAAcc').innerHTML = Number(markerB.dataset.accuracy).toFixed(2);
+
+        document.getElementById('markerBLong').innerHTML = Number(markerC.dataset.longitude).toFixed(6);
+        document.getElementById('markerBLat').innerHTML = Number(markerC.dataset.latitude).toFixed(6);
+        document.getElementById('markerBAcc').innerHTML = Number(markerC.dataset.accuracy).toFixed(2);
+
+        saveTransformations(markerB, markerC);
+      }
+    }
+
+    /**
+     * Click Event Handler
+     * Get the GPS location, then plot this point on the image
+     * */
+    image.addEventListener("click", function (event) {
       const locationError = () => {
         console.log('error getting location.');
       }
+
+      const locationSuccess = (position) => {
+        plotPoint(event.clientX, event.clientY, position.coords);
+      };
 
       if (!navigator.geolocation) {
         console.log("Geolocation is not supported by your browser");
@@ -296,10 +306,6 @@
         };
         navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
       }
-    };
-
-    image.addEventListener("click", function (event) {
-      plotPoint(event.clientX, event.clientY);
     });
 
     if( !navigator.geolocation ) {
