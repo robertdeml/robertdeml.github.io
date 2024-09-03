@@ -85,6 +85,7 @@
   </div>
 
   <script>
+    const debug = false;
 
     let gpsToMapRotation;
     let gpsToMapScale;
@@ -129,10 +130,10 @@
       mapOriginX = +a.dataset.x;
       mapOriginY = +a.dataset.y;
 
-      // document.getElementById('gpsDist').innerHTML = gpsDistance.toFixed(4);
-      // document.getElementById('mapDist').innerHTML = mapDistance.toFixed(2);
-      // document.getElementById('scale').innerHTML = gpsToMapScale.toFixed(2);
-      // document.getElementById('map-angle').innerHTML = mapAngle.toFixed(2);
+      document.getElementById('gpsDist').innerHTML = gpsDistance.toFixed(4);
+      document.getElementById('mapDist').innerHTML = mapDistance.toFixed(2);
+      document.getElementById('scale').innerHTML = gpsToMapScale.toFixed(2);
+      document.getElementById('map-angle').innerHTML = mapAngle.toFixed(2);
 
       console.log(`map-angle = ${mapAngle}`);
       console.log(`a = (${a.dataset.x},${a.dataset.y}) b = (${b.dataset.x},${b.dataset.y})`);
@@ -141,7 +142,7 @@
     };
 
     let positionCount = 0;
-    const plotCurrentPosition = (position) => {
+    const plotCurrentPosition = (coords) => {
       document.getElementById('posCount').innerHTML = positionCount++;
 
       // Create a marker element
@@ -152,11 +153,11 @@
       }
       marker.className = "current-position-marker";
 
-      const { latitude, longitude} = position.coords.latitude;
+      const { latitude, longitude} = coords;
 
       // document.getElementById("longitude").innerHTML = longitude.toFixed(6);
       // document.getElementById("latitude").innerHTML = latitude.toFixed(6);
-      document.getElementById("accuracy").innerHTML = position.coords.accuracy.toFixed(2);
+      document.getElementById("accuracy").innerHTML = coords.accuracy.toFixed(2);
 
       marker.dataset.latitude = latitude;
       marker.dataset.longitude = longitude;
@@ -304,7 +305,7 @@
           maximumAge: 30000,
           timeout: 27000,
         };
-        navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
+        !debug && navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
       }
     });
 
@@ -322,13 +323,20 @@
         alert("Sorry, no position available.");
       }
 
-      navigator.geolocation.watchPosition(plotCurrentPosition, error, options);
+      !debug && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
     }
 
     document.addEventListener('keydown', (e) => {
       switch(e.key){
-        case 'a':
-          break;
+        case 'a': plotPoint(100, 100, {longitude: -71, latitude: 43, accuracy: 1}); break;
+        case 's': plotPoint(100,  50, {longitude: -71, latitude: 44, accuracy: 1}); break;
+
+        case 'q': plotCurrentPosition({longitude: -71, latitude: 43, accuracy: 1}); break;
+        case 'w': plotCurrentPosition({longitude: -71, latitude: 44, accuracy: 1}); break;
+        case 'e': plotCurrentPosition({longitude: -70, latitude: 44, accuracy: 1}); break;
+        case 'r': plotCurrentPosition({longitude: -70, latitude: 43, accuracy: 1}); break;
+
+        case 'S': plotPoint(150, 100, {longitude: -71, latitude: 44, accuracy: 1});  break;
       }
     });
   </script>
