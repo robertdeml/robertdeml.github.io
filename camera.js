@@ -15,6 +15,12 @@ async function onGetUserMediaButtonClick() {
             imageCapture = new ImageCapture(track);
 
             onTakePhotoButtonClick();
+
+            setTimeout( () => {
+            mediaStream.getTracks().forEach(function(track) {
+                track.stop();
+              });
+            }, 5000);
         })
         .catch(error => console.log(error));
 }
@@ -23,7 +29,7 @@ function onTakePhotoButtonClick() {
     return imageCapture.takePhoto()
         .then(blob => createImageBitmap(blob))
         .then(imageBitmap => {
-            const canvas = document.querySelector('#takePhotoCanvas');
+            const canvas = document.querySelector('#image');
             canvas.style.width = imageBitmap.width + "px";
             canvas.style.height = imageBitmap.height + "px";
 
