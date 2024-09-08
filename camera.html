@@ -5,92 +5,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Static Map</title>
+
     <style>
     </style>
 </head>
 
 <body>
     <div id="results">
-        <!-- <div>
-            <video autoplay="" width="0" , height="0"></video>
-            <button id="getUserMediaButton">Get User Media</button>
-        </div>
--->
         <div>
             <canvas id="takePhotoCanvas"></canvas>
-            <!-- <button id="takePhotoButton" disabled="">Take Photo</button> -->
         </div> 
         <button id="captureMap">CaptureMap</button>
     </div>
 
     <script>
-        var imageCapture;
-
-        async function onCaptureMap() {
-            await onGetUserMediaButtonClick();
-            await onTakePhotoButtonClick();
-        }
-
-        // get a list of available cameras
-        async function onGetUserMediaButtonClick() {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode:{ exact: "environment"} } } )
-            // return navigator.mediaDevices.getUserMedia({ video: true } )
-                .then(async mediaStream => {
-                    // document.querySelector('video').srcObject = mediaStream;
-                    // document.querySelector('#takePhotoButton').disabled = false;
-
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    console.log("devices:", devices);
-
-                    devices.forEach(dev => {
-                        const div = document.createElement('div');
-                        div.innerText = `${dev.label} - ${dev.kind}`;
-                        document.getElementById('results').appendChild(div);
-                    });
-
-
-                    const track = mediaStream.getVideoTracks()[0];
-                    imageCapture = new ImageCapture(track);
-                })
-                .catch(error => console.log(error));
-        }
-
-        function onTakePhotoButtonClick() {
-            return imageCapture.takePhoto()
-                .then(blob => createImageBitmap(blob))
-                .then(imageBitmap => {
-                    const canvas = document.querySelector('#takePhotoCanvas');
-                    canvas.style.width = imageBitmap.width + "px";
-                    canvas.style.height = imageBitmap.height + "px";
-
-                    drawCanvas(canvas, imageBitmap);
-                })
-                .catch(error => console.log(error));
-        }
-
-        /* Utils */
-
-        function drawCanvas(canvas, img) {
-            canvas.width = getComputedStyle(canvas).width.split('px')[0];
-            canvas.height = getComputedStyle(canvas).height.split('px')[0];
-            let ratio = Math.min(canvas.width / img.width, canvas.height / img.height);
-            let x = (canvas.width - img.width * ratio) / 2;
-            let y = (canvas.height - img.height * ratio) / 2;
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
-                x, y, img.width * ratio, img.height * ratio);
-        }
-
-        // document.querySelector('video').addEventListener('play', function () {
-        //     document.querySelector('#takePhotoButton').disabled = false;
-        // });
-
-        // document.querySelector('#getUserMediaButton').addEventListener('click', onGetUserMediaButtonClick);
-        // document.querySelector('#takePhotoButton').addEventListener('click', onTakePhotoButtonClick);
-
-        document.getElementById('captureMap').addEventListener('click', onCaptureMap);
-
     </script>
+
+    <script src="camera.js"></script>
 </body>
 
 </html>
