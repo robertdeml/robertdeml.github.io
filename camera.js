@@ -53,3 +53,18 @@ function drawCanvas(canvas, img) {
 
 document.getElementById('captureMap').addEventListener('click', onCaptureMap);
 
+const fileInput = document.querySelector('input[type="file"]');
+
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const img = new Image();
+    img.src = reader.result;
+    img.id = "image";
+    document.body.appendChild(img);
+  };
+
+  reader.readAsDataURL(file);
+});
