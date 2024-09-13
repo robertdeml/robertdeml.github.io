@@ -51,7 +51,7 @@ function drawCanvas(canvas, img) {
         x, y, img.width * ratio, img.height * ratio);
 }
 
-document.getElementById('captureMap').addEventListener('click', onCaptureMap);
+// document.getElementById('captureMap').addEventListener('click', onCaptureMap);
 
 const fileInput = document.querySelector('input[type="file"]');
 
@@ -63,7 +63,7 @@ fileInput.addEventListener('change', (event) => {
     const img = new Image();
     img.src = reader.result;
     img.id = "image";
-    document.body.appendChild(img);
+    document.querySelector('#image-container').appendChild(img);
   };
 
   reader.readAsDataURL(file);
