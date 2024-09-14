@@ -1,4 +1,4 @@
-const debug = false;
+const debugGps = false;
 
 let gpsToMapRotation;
 let gpsToMapScale;
@@ -192,11 +192,15 @@ const plotPoint = (clientX, clientY, coords) =>{
   }
 }
 
+function attachClickHandler(image){
+  image.addEventListener("click", (e) => imageClickHandler(e));
+};
+
 /**
  * Click Event Handler
  * Get the GPS location, then plot this point on the image
  * */
-image.addEventListener("click", function (event) {
+function imageClickHandler(event) {
   const locationError = () => {
     console.log('error getting location.');
   }
@@ -213,9 +217,9 @@ image.addEventListener("click", function (event) {
       maximumAge: 30000,
       timeout: 27000,
     };
-    !debug && navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
+    !debugGps && navigator.geolocation.getCurrentPosition(locationSuccess, locationError, options);
   }
-});
+};
 
 if( !navigator.geolocation ) {
   console.log("Geolocation is not supported by your browser");
@@ -231,12 +235,12 @@ if( !navigator.geolocation ) {
     alert("Sorry, no position available.");
   }
 
-  !debug && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
+  !debugGps && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
 }
 
 let coord;
 
-debug && document.addEventListener('keydown', (e) => {
+debugGps && document.addEventListener('keydown', (e) => {
   switch(e.key){
     case '1': plotPoint(100, 100, coord); break;
     case '2': plotPoint(100,  50, coord); break;

@@ -1,10 +1,6 @@
 var imageCapture;
 
-const debug = (str) => {
-  const msg = document.createElement('p');
-  msg.innerHTML = str;
-  document.querySelector('#debug').appendChild(msg);
-}
+
 debug("starting...");
 // async function onCaptureMap() {
 //     await onGetUserMediaButtonClick();
@@ -79,6 +75,9 @@ fileInput.addEventListener('change', (event) => {
     document.querySelector('#image-container').appendChild(img);
 
     debug("image appended. ");
+
+    attachClickHandler(img);
+    debug("click handler attached. ");
   };
 
   reader.readAsDataURL(file);
