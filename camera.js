@@ -1,11 +1,11 @@
 var imageCapture;
 
 const debug = (str) => {
-  const span = document.createElement('span');
-  span.innerHTML = str;
-  document.querySelector('#debug').appendChild(span);
+  const msg = document.createElement('p');
+  msg.innerHTML = str;
+  document.querySelector('#debug').appendChild(msg);
 }
-
+debug("starting...");
 // async function onCaptureMap() {
 //     await onGetUserMediaButtonClick();
 // }
