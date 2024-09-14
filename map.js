@@ -86,14 +86,14 @@ const plotCurrentPosition = (coords) => {
   marker.dataset.x = x;
   marker.dataset.y = y;
 
-  document.getElementById("translateX").innerHTML = translateX.toFixed(6);
-  document.getElementById("translateY").innerHTML = translateY.toFixed(6);
-  document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
-  document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
-  document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
-  document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
-  document.getElementById("mapX").innerHTML = x.toFixed(2);
-  document.getElementById("mapY").innerHTML = y.toFixed(2);
+  // document.getElementById("translateX").innerHTML = translateX.toFixed(6);
+  // document.getElementById("translateY").innerHTML = translateY.toFixed(6);
+  // document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
+  // document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
+  // document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
+  // document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
+  // document.getElementById("mapX").innerHTML = x.toFixed(2);
+  // document.getElementById("mapY").innerHTML = y.toFixed(2);
 
   // Append the marker to the container
   if (markerCreated) {

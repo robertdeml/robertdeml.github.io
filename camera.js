@@ -54,16 +54,29 @@ function drawCanvas(canvas, img) {
 // document.getElementById('captureMap').addEventListener('click', onCaptureMap);
 
 const fileInput = document.querySelector('input[type="file"]');
+const debug = (str) => {
+    const span = document.createElement('span');
+    span.innerHTML = str;
+    document.querySelector('#debug').appendChild(span);
+}
 
+debug("attaching listener. ");
 fileInput.addEventListener('change', (event) => {
+  debug("listener triggered. ");
+
+  // Get the selected file
   const file = event.target.files[0];
   const reader = new FileReader();
 
   reader.onload = () => {
+    debug("file loaded. ");
+
     const img = new Image();
     img.src = reader.result;
     img.id = "image";
     document.querySelector('#image-container').appendChild(img);
+
+    debug("image appended. ");
   };
 
   reader.readAsDataURL(file);
