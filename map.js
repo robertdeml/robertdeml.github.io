@@ -7,7 +7,8 @@ let gpsLongitude;
 let mapOriginX;
 let mapOriginY;
 let currentPositionInterval;
-// let mapHeight;
+let imgOffsetX = 0;
+let imgOffsetY = 0;
 
 function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement function
   var R = 6378.137; // Radius of earth in KM
@@ -22,9 +23,7 @@ function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement fu
 }
 
 const saveTransformations = (a, b) => {
-  // mapHeight = document.getElementById('image-container').getBoundingClientRect().height;
   const gpsAngle = Math.atan2(+b.dataset.latitude - +a.dataset.latitude, +b.dataset.longitude - +a.dataset.longitude);
-  // const mapAngle = Math.atan2(mapHeight - (b.dataset.y - a.dataset.y), b.dataset.x - a.dataset.x);
   const mapAngle = Math.atan2(-Number(b.dataset.y) + Number(a.dataset.y), b.dataset.x - a.dataset.x);
   gpsToMapRotation = mapAngle - gpsAngle;
 
@@ -77,23 +76,22 @@ const plotCurrentPosition = (coords) => {
   const rotateY = translateY * Math.cos(gpsToMapRotation) + translateX * Math.sin(gpsToMapRotation);
   const scaleX = rotateX * gpsToMapScale; // scale to map units
   const scaleY = rotateY * gpsToMapScale;
-  const x = scaleX + mapOriginX; // translate to map coordinates
-  // const y = mapHeight - (scaleY + mapOriginY);
-  const y = -scaleY + mapOriginY;
+  const x = scaleX + mapOriginX + imgOffsetX; // translate to map coordinates
+  const y = -scaleY + mapOriginY + imgOffsetY;
 
   marker.style.left = x + "px";
   marker.style.top = y + "px";
   marker.dataset.x = x;
   marker.dataset.y = y;
 
-  // document.getElementById("translateX").innerHTML = translateX.toFixed(6);
-  // document.getElementById("translateY").innerHTML = translateY.toFixed(6);
-  // document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
-  // document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
-  // document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
-  // document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
-  // document.getElementById("mapX").innerHTML = x.toFixed(2);
-  // document.getElementById("mapY").innerHTML = y.toFixed(2);
+  document.getElementById("translateX").innerHTML = translateX.toFixed(6);
+  document.getElementById("translateY").innerHTML = translateY.toFixed(6);
+  document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
+  document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
+  document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
+  document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
+  document.getElementById("mapX").innerHTML = x.toFixed(2);
+  document.getElementById("mapY").innerHTML = y.toFixed(2);
 
   // Append the marker to the container
   if (markerCreated) {
@@ -193,20 +191,25 @@ const plotPoint = (clientX, clientY, coords) =>{
 }
 
 function attachClickHandler(image){
-  image.addEventListener("click", (e) => imageClickHandler(e));
+  const rect = document.querySelector('#image-container').getBoundingClientRect();
+  imgOffsetX = rect.x;
+  imgOffsetY = rect.y;
+  image.addEventListener("click", (e) => {
+    imageClickHandler(e.clientX - imgOffsetX, e.clientY - imgOffsetY);
+  });
 };
 
 /**
  * Click Event Handler
  * Get the GPS location, then plot this point on the image
  * */
-function imageClickHandler(event) {
+function imageClickHandler(posX, posY) {
   const locationError = () => {
     console.log('error getting location.');
   }
 
   const locationSuccess = (position) => {
-    plotPoint(event.clientX, event.clientY, position.coords);
+    plotPoint(posX, posY, position.coords);
   };
 
   if (!navigator.geolocation) {
@@ -238,9 +241,9 @@ if( !navigator.geolocation ) {
   !debugGps && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
 }
 
-let coord;
-
 debugGps && document.addEventListener('keydown', (e) => {
+  let coord;
+
   switch(e.key){
     case '1': plotPoint(100, 100, coord); break;
     case '2': plotPoint(100,  50, coord); break;
