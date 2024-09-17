@@ -190,6 +190,19 @@ const plotPoint = (clientX, clientY, coords) =>{
   }
 }
 
+function movePoint(x, y) {
+  const markerArr = document.querySelectorAll('.marker');
+  const marker = markerArr[markerArr.length - 1];
+  if (!marker) return;
+
+  const xCoord = Number(marker.dataset.x) + x;
+  const yCoord = Number(marker.dataset.y) + y;
+  marker.style.left = xCoord + "px";
+  marker.style.top = yCoord + "px";
+  marker.dataset.x = xCoord;
+  marker.dataset.y = yCoord;
+}
+
 function attachClickHandler(image){
   const rect = document.querySelector('#image-container').getBoundingClientRect();
   imgOffsetX = rect.x;
@@ -197,6 +210,10 @@ function attachClickHandler(image){
   image.addEventListener("click", (e) => {
     imageClickHandler(e.clientX - imgOffsetX, e.clientY - imgOffsetY);
   });
+  document.querySelector("#point-up").addEventListener('click', () => movePoint(0, -1));
+  document.querySelector("#point-down").addEventListener('click', () => movePoint(0, 1));
+  document.querySelector("#point-left").addEventListener('click', () => movePoint(-1, 0));
+  document.querySelector("#point-right").addEventListener('click', () => movePoint(1, 0));
 };
 
 /**
