@@ -59,6 +59,14 @@
     .hidden {
       display: none;
     }
+    .point-controls {
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+    }
+    .move-point {
+      font-size: 2rem;
+    }
   </style>
 </head>
 
@@ -68,11 +76,11 @@
     <div class="image-container" id="image-container">
     </div>
   </div>
-  <div class=""point-controls>
-    <i class="bi bi-arrow-left-square" id="point-left"></i>
-    <i class="bi bi-arrow-up-square" id="point-up"></i>
-    <i class="bi bi-arrow-down-square" id="point-down"></i>
-    <i class="bi bi-arrow-right-square" id="point-right"></i>
+  <div class="point-controls">
+    <i class="bi bi-arrow-left-square move-point" id="point-left"></i>
+    <i class="bi bi-arrow-up-square move-point" id="point-up"></i>
+    <i class="bi bi-arrow-down-square move-point" id="point-down"></i>
+    <i class="bi bi-arrow-right-square move-point" id="point-right"></i>
   </div>
   <div class="point-data">
     <div>accuracy: <span id="accuracy"></span></div>
