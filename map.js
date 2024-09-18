@@ -162,7 +162,6 @@ const plotPoint = (clientX, clientY, coords) =>{
     document.getElementById('markerBAcc').innerHTML = accuracy.toFixed(2);
 
     saveTransformations(markerA, markerB);
-
   }
   // 3rd marker.  Replace the first
   else {
@@ -191,8 +190,7 @@ const plotPoint = (clientX, clientY, coords) =>{
 }
 
 function movePoint(x, y) {
-  const markerArr = document.querySelectorAll('.marker');
-  const marker = markerArr[markerArr.length - 1];
+  const [marker, prevMarker] = Array.from(document.querySelectorAll('.marker')).reverse();
   if (!marker) return;
 
   const xCoord = Number(marker.dataset.x) + x;
@@ -201,6 +199,10 @@ function movePoint(x, y) {
   marker.style.top = yCoord + "px";
   marker.dataset.x = xCoord;
   marker.dataset.y = yCoord;
+
+  if( prevMarker ){
+    saveTransformations(marker, prevMarker);
+  }  
 }
 
 function attachClickHandler(image){
