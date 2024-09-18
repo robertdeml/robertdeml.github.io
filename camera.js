@@ -20,7 +20,7 @@ fileInput.addEventListener('change', (event) => {
 
     debug("image appended. ");
 
-    document.querySelector("input").hidden = true;
+    document.querySelector("input").classList.add('hidden');
     setTimeout(() => attachClickHandler(img), 10);
     debug("click handler attached. ");
   };
