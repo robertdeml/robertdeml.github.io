@@ -71,10 +71,10 @@ const plotCurrentPosition = (coords) => {
     const breakcrumb = document.createElement("div");
     breakcrumb.className = "breadcrumb-position-marker";
 
-    breakcrumb.style.left = x + "px";
-    breakcrumb.style.top = y + "px";
-    breakcrumb.dataset.x = x;
-    breakcrumb.dataset.y = y;
+    breakcrumb.style.left = marker.dataset.x + "px";
+    breakcrumb.style.top = marker.dataset.y + "px";
+    breakcrumb.dataset.x = marker.dataset.x;
+    breakcrumb.dataset.y = marker.dataset.y;
     imageContainer.appendChild(breakcrumb);
   }
 
@@ -276,25 +276,28 @@ if (!navigator.geolocation) {
   !debugGps && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
 }
 
+let coord;
+let screen;
+
 debugGps && document.addEventListener('keydown', (e) => {
-  let coord;
 
   switch (e.key) {
     case '1': plotPoint(100, 100, coord); break;
     case '2': plotPoint(100, 50, coord); break;
 
-    case 'q': coord = { longitude: -71, latitude: 45, accuracy: 1 }; break;
-    case 'w': coord = { longitude: -70, latitude: 45, accuracy: 1 }; break;
-    case 'e': coord = { longitude: -69, latitude: 45, accuracy: 1 }; break;
+    case 'q': coord = { longitude: -71, latitude: 45, accuracy: 1 }; screen = { x: 0, y: 0 }; break;
+    case 'w': coord = { longitude: -70, latitude: 45, accuracy: 1 }; screen = { x: 50, y: 0 }; break;
+    case 'e': coord = { longitude: -69, latitude: 45, accuracy: 1 }; screen = { x: 100, y: 0 }; break;
 
-    case 'a': coord = { longitude: -71, latitude: 44, accuracy: 1 }; break;
-    case 's': coord = { longitude: -70, latitude: 44, accuracy: 1 }; break;
-    case 'd': coord = { longitude: -69, latitude: 44, accuracy: 1 }; break;
+    case 'a': coord = { longitude: -71, latitude: 44, accuracy: 1 }; screen = { x: 0, y: 0 }; break;
+    case 's': coord = { longitude: -70, latitude: 44, accuracy: 1 }; screen = { x: 50, y: 50 }; break;
+    case 'd': coord = { longitude: -69, latitude: 44, accuracy: 1 }; screen = { x: 100, y: 100 }; break;
 
-    case 'z': coord = { longitude: -71, latitude: 43, accuracy: 1 }; break;
-    case 'x': coord = { longitude: -70, latitude: 43, accuracy: 1 }; break;
-    case 'c': coord = { longitude: -69, latitude: 43, accuracy: 1 }; break;
+    case 'z': coord = { longitude: -71, latitude: 43, accuracy: 1 }; screen = { x: 0, y: 0 }; break;
+    case 'x': coord = { longitude: -70, latitude: 43, accuracy: 1 }; screen = { x: 50, y: 50 }; break;
+    case 'c': coord = { longitude: -69, latitude: 43, accuracy: 1 }; screen = { x: 100, y: 100 }; break;
 
-    case 'p': plotCurrentPosition(coord);
+    case 'p': plotCurrentPosition(coord); break;
+    case 'o': plotPoint(screen.x, screen.y, coord);
   }
 });
