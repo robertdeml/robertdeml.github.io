@@ -39,12 +39,13 @@
       background-color: red;
       border-radius: 50%;
       transform: translate(-50%, -50%);
+      z-index: 20;
     }
 
     .current-position-marker {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 15px;
+      height: 15px;
       background-color: lime;
       border-radius: 50%;
       transform: translate(-50%, -50%);
@@ -53,8 +54,8 @@
 
     .breadcrumb-position-marker {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 10px;
+      height: 10px;
       background-color: green;
       border-radius: 50%;
       transform: translate(-50%, -50%);
@@ -92,10 +93,15 @@
     <div id="breadcrumb-container"></div>
   </div>
   <div class="point-controls">
-    <i class="bi bi-arrow-left-square move-point" id="point-left"></i>
-    <i class="bi bi-arrow-up-square move-point" id="point-up"></i>
-    <i class="bi bi-arrow-down-square move-point" id="point-down"></i>
-    <i class="bi bi-arrow-right-square move-point" id="point-right"></i>
+    <div>
+      <button id="clear-footprints">Clear Footprints</button>
+    </div>
+    <div>
+      <i class="bi bi-arrow-left-square move-point" id="point-left"></i>
+      <i class="bi bi-arrow-up-square move-point" id="point-up"></i>
+      <i class="bi bi-arrow-down-square move-point" id="point-down"></i>
+      <i class="bi bi-arrow-right-square move-point" id="point-right"></i>
+    </div>
   </div>
   <div class="point-data">
     <div>accuracy: <span id="accuracy"></span></div>

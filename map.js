@@ -225,6 +225,10 @@ function movePoint(x, y) {
   }
 }
 
+function clearFootprints() {
+  document.getElementById('breadcrumb-container').replaceChildren();
+}
+
 function attachClickHandler(image) {
   const rect = document.querySelector('#image-container').getBoundingClientRect();
   imgOffsetX = rect.x;
@@ -232,6 +236,7 @@ function attachClickHandler(image) {
   image.addEventListener("click", (e) => {
     imageClickHandler(e.clientX - imgOffsetX, e.clientY - imgOffsetY);
   });
+  document.querySelector("#clear-footprints").addEventListener('click', () => clearFootprints());
   document.querySelector("#point-up").addEventListener('click', () => movePoint(0, -1));
   document.querySelector("#point-down").addEventListener('click', () => movePoint(0, 1));
   document.querySelector("#point-left").addEventListener('click', () => movePoint(-1, 0));
