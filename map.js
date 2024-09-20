@@ -60,7 +60,23 @@ const plotCurrentPosition = (coords) => {
   }
   marker.className = "current-position-marker";
 
-  const { latitude, longitude} = coords;
+  const markerLatitude = marker.dataset.latitude;
+  const markerLongitude = marker.dataset.longitude;
+
+  const { latitude, longitude, accuracy } = coords;
+
+  const gpsDistanceMeters = measure(coords.latitude, coords.longitude, markerLatitude, markerLongitude);
+
+  if (gpsDistanceMeters > accuracy) {
+    const breakcrumb = document.createElement("div");
+    breakcrumb.className = "breadcrumb-position-marker";
+
+    breakcrumb.style.left = x + "px";
+    breakcrumb.style.top = y + "px";
+    breakcrumb.dataset.x = x;
+    breakcrumb.dataset.y = y;
+    imageContainer.appendChild(breakcrumb);
+  }
 
   document.getElementById("longitude").innerHTML = longitude.toFixed(6);
   document.getElementById("latitude").innerHTML = latitude.toFixed(6);
@@ -126,10 +142,10 @@ const appendNewPoint = (clientX, clientY) => {
   return marker.id;
 };
 
-const plotPoint = (clientX, clientY, coords) =>{
+const plotPoint = (clientX, clientY, coords) => {
   const markerId = appendNewPoint(clientX, clientY);
 
-  const {latitude, longitude, accuracy} = coords;
+  const { latitude, longitude, accuracy } = coords;
 
   // find up to 3 markers
   const [markerA, markerB, markerC] = document.querySelectorAll('.marker');
@@ -200,12 +216,12 @@ function movePoint(x, y) {
   marker.dataset.x = xCoord;
   marker.dataset.y = yCoord;
 
-  if( prevMarker ){
+  if (prevMarker) {
     saveTransformations(marker, prevMarker);
-  }  
+  }
 }
 
-function attachClickHandler(image){
+function attachClickHandler(image) {
   const rect = document.querySelector('#image-container').getBoundingClientRect();
   imgOffsetX = rect.x;
   imgOffsetY = rect.y;
@@ -243,7 +259,7 @@ function imageClickHandler(posX, posY) {
   }
 };
 
-if( !navigator.geolocation ) {
+if (!navigator.geolocation) {
   console.log("Geolocation is not supported by your browser");
 } else {
   const options = {
@@ -263,21 +279,21 @@ if( !navigator.geolocation ) {
 debugGps && document.addEventListener('keydown', (e) => {
   let coord;
 
-  switch(e.key){
+  switch (e.key) {
     case '1': plotPoint(100, 100, coord); break;
-    case '2': plotPoint(100,  50, coord); break;
+    case '2': plotPoint(100, 50, coord); break;
 
-    case 'q': coord = {longitude: -71, latitude: 45, accuracy: 1}; break;
-    case 'w': coord = {longitude: -70, latitude: 45, accuracy: 1}; break;
-    case 'e': coord = {longitude: -69, latitude: 45, accuracy: 1}; break;
+    case 'q': coord = { longitude: -71, latitude: 45, accuracy: 1 }; break;
+    case 'w': coord = { longitude: -70, latitude: 45, accuracy: 1 }; break;
+    case 'e': coord = { longitude: -69, latitude: 45, accuracy: 1 }; break;
 
-    case 'a': coord = {longitude: -71, latitude: 44, accuracy: 1}; break;
-    case 's': coord = {longitude: -70, latitude: 44, accuracy: 1}; break;
-    case 'd': coord = {longitude: -69, latitude: 44, accuracy: 1}; break;
+    case 'a': coord = { longitude: -71, latitude: 44, accuracy: 1 }; break;
+    case 's': coord = { longitude: -70, latitude: 44, accuracy: 1 }; break;
+    case 'd': coord = { longitude: -69, latitude: 44, accuracy: 1 }; break;
 
-    case 'z': coord = {longitude: -71, latitude: 43, accuracy: 1}; break;
-    case 'x': coord = {longitude: -70, latitude: 43, accuracy: 1}; break;
-    case 'c': coord = {longitude: -69, latitude: 43, accuracy: 1}; break;
+    case 'z': coord = { longitude: -71, latitude: 43, accuracy: 1 }; break;
+    case 'x': coord = { longitude: -70, latitude: 43, accuracy: 1 }; break;
+    case 'c': coord = { longitude: -69, latitude: 43, accuracy: 1 }; break;
 
     case 'p': plotCurrentPosition(coord);
   }
