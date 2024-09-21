@@ -58,6 +58,8 @@ const plotCurrentPosition = (currentCoords) => {
   const markerCreated = !lastPositionMarker;
   if (!lastPositionMarker) {
     lastPositionMarker = document.createElement("div");
+    const text = document.createElement('p');
+    lastPositionMarker.appendChild(text);
   }
   lastPositionMarker.className = "current-position-marker";
 
@@ -116,6 +118,9 @@ const plotCurrentPosition = (currentCoords) => {
   if (markerCreated) {
     imageContainer.appendChild(lastPositionMarker);
   }
+
+  const text = document.querySelector(".current-position-marker p");
+  text.innerText = getCoordsText(coord);
 }
 
 let markerId = 0;
@@ -142,16 +147,20 @@ const appendNewPoint = (clientX, clientY, coords) => {
   marker.id = `marker_${markerId}`;
 
   const text = document.createElement("p");
-  const { latitude, longitude } = coords;
-  const latVal = ((latitude.toFixed(5) - latitude.toFixed(2)) * 10000).toFixed(0);
-  const lonVal = ((longitude.toFixed(5) - longitude.toFixed(2)) * 10000).toFixed(0);
-  text.innerText = latVal + ", " + lonVal;
   marker.appendChild(text);
+  text.innerText = getCoordsText(coord);
 
   // Append the marker to the container
   imageContainer.appendChild(marker);
   return marker.id;
 };
+
+function getCoordsText(coords) {
+  const { latitude, longitude } = coords;
+  const latVal = ((latitude.toFixed(6) - latitude.toFixed(2)) * 100000).toFixed(0);
+  const lonVal = ((longitude.toFixed(6) - longitude.toFixed(2)) * 100000).toFixed(0);
+  return latVal + ", " + lonVal;
+}
 
 const plotPoint = (clientX, clientY, coords) => {
   const markerId = appendNewPoint(clientX, clientY, coords);
@@ -309,17 +318,17 @@ debugGps && document.addEventListener('keydown', (e) => {
     case '2': plotPoint(100, 50, coord); break;
 
       42.9374444, -71.5138986
-    case 'q': coord = { longitude: x1, latitude: y1, accuracy: 1 }; screen = { x: 0, y: 0 }; break;
-    case 'w': coord = { longitude: x2, latitude: y1, accuracy: 1 }; screen = { x: 50, y: 0 }; break;
-    case 'e': coord = { longitude: x3, latitude: y1, accuracy: 1 }; screen = { x: 100, y: 0 }; break;
+    case 'q': coord = { longitude: x1, latitude: y1, accuracy: 1 }; screen = { x: 100, y: 100 }; break;
+    case 'w': coord = { longitude: x2, latitude: y1, accuracy: 1 }; screen = { x: 150, y: 100 }; break;
+    case 'e': coord = { longitude: x3, latitude: y1, accuracy: 1 }; screen = { x: 200, y: 100 }; break;
 
-    case 'a': coord = { longitude: x1, latitude: y2, accuracy: 1 }; screen = { x: 0, y: 50 }; break;
-    case 's': coord = { longitude: x2, latitude: y2, accuracy: 1 }; screen = { x: 50, y: 50 }; break;
-    case 'd': coord = { longitude: x3, latitude: y2, accuracy: 1 }; screen = { x: 100, y: 50 }; break;
+    case 'a': coord = { longitude: x1, latitude: y2, accuracy: 1 }; screen = { x: 100, y: 150 }; break;
+    case 's': coord = { longitude: x2, latitude: y2, accuracy: 1 }; screen = { x: 150, y: 150 }; break;
+    case 'd': coord = { longitude: x3, latitude: y2, accuracy: 1 }; screen = { x: 200, y: 150 }; break;
 
-    case 'z': coord = { longitude: x1, latitude: y3, accuracy: 1 }; screen = { x: 0, y: 100 }; break;
-    case 'x': coord = { longitude: x2, latitude: y3, accuracy: 1 }; screen = { x: 50, y: 100 }; break;
-    case 'c': coord = { longitude: x3, latitude: y3, accuracy: 1 }; screen = { x: 100, y: 100 }; break;
+    case 'z': coord = { longitude: x1, latitude: y3, accuracy: 1 }; screen = { x: 100, y: 200 }; break;
+    case 'x': coord = { longitude: x2, latitude: y3, accuracy: 1 }; screen = { x: 150, y: 200 }; break;
+    case 'c': coord = { longitude: x3, latitude: y3, accuracy: 1 }; screen = { x: 200, y: 200 }; break;
 
     case 'p': plotCurrentPosition(coord); break;
     case 'o':
