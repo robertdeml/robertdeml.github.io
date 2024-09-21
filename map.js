@@ -120,7 +120,7 @@ const plotCurrentPosition = (currentCoords) => {
   }
 
   const text = document.querySelector(".current-position-marker p");
-  text.innerText = getCoordsText(coord);
+  text.innerText = getCoordsText(currentCoords);
 }
 
 let markerId = 0;
@@ -148,7 +148,7 @@ const appendNewPoint = (clientX, clientY, coords) => {
 
   const text = document.createElement("p");
   marker.appendChild(text);
-  text.innerText = getCoordsText(coord);
+  text.innerText = getCoordsText(coords);
 
   // Append the marker to the container
   imageContainer.appendChild(marker);
