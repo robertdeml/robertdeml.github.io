@@ -1,4 +1,3 @@
-const debugGps = false;
 
 let gpsToMapRotation;
 let gpsToMapScale;
@@ -9,6 +8,15 @@ let mapOriginY;
 let currentPositionInterval;
 let imgOffsetX = 0;
 let imgOffsetY = 0;
+
+let positionCount = 0;
+let markerId = 0;
+
+// Get the image element and container
+const section = document.getElementById("section");
+const image = document.getElementById("image");
+const imageContainer = document.getElementById("image-container");
+const breadcrumbContainer = document.getElementById("breadcrumb-container");
 
 function measure(lat1, lon1, lat2, lon2) {  // generally used geo measurement function
   var R = 6378.137; // Radius of earth in KM
@@ -48,88 +56,84 @@ const saveTransformations = (a, b) => {
   document.getElementById('map-angle').innerHTML = mapAngle.toFixed(2);
 };
 
-let positionCount = 0;
 const plotCurrentPosition = (currentCoords) => {
-  document.getElementById('posCount').innerHTML = positionCount++;
+  try {
+    document.getElementById('posCount').innerHTML = positionCount++;
 
-  // RJD: create current mark at start off screen
-  // Create a marker element
-  let lastPositionMarker = document.querySelector(".current-position-marker");
-  const markerCreated = !lastPositionMarker;
-  if (!lastPositionMarker) {
-    lastPositionMarker = document.createElement("div");
-    const text = document.createElement('p');
-    lastPositionMarker.appendChild(text);
+    // RJD: create current mark at start off screen
+    // Create a marker element
+    let lastPositionMarker = document.querySelector(".current-position-marker");
+    const markerCreated = !lastPositionMarker;
+    if (!lastPositionMarker) {
+      lastPositionMarker = document.createElement("div");
+      const text = document.createElement('p');
+      lastPositionMarker.appendChild(text);
+    }
+    lastPositionMarker.className = "current-position-marker";
+
+    const lastBreadcrumbMarker = document.querySelector("#breadcrumb-container div:last-of-type");
+    const { latitude: latStr, longitude: longStr } = lastBreadcrumbMarker?.dataset || {};
+    const { latitude: markerLatitude = +latStr, longitude: markerLongitude = +longStr } = {};
+
+    const { latitude, longitude, accuracy } = currentCoords;
+
+    const gpsDistanceMeters = measure(latitude, longitude, +markerLatitude, +markerLongitude);
+
+    lastPositionMarker.dataset.latitude = latitude;
+    lastPositionMarker.dataset.longitude = longitude;
+
+    // Set the marker's position based on rotation and scale
+    const translateX = longitude - gpsLongitude; // translate to a known point
+    const translateY = latitude - gpsLatitude;
+    const rotateX = translateX * Math.cos(gpsToMapRotation) - translateY * Math.sin(gpsToMapRotation); // rotate the point
+    const rotateY = translateY * Math.cos(gpsToMapRotation) + translateX * Math.sin(gpsToMapRotation);
+    const scaleX = rotateX * gpsToMapScale; // scale to map units
+    const scaleY = rotateY * gpsToMapScale;
+    const x = scaleX + mapOriginX + imgOffsetX; // translate to map coordinates
+    const y = -scaleY + mapOriginY + imgOffsetY;
+
+    lastPositionMarker.style.left = x + "px";
+    lastPositionMarker.style.top = y + "px";
+    lastPositionMarker.dataset.x = x;
+    lastPositionMarker.dataset.y = y;
+
+    if (gpsDistanceMeters > accuracy || !lastBreadcrumbMarker) {
+      const breadcrumb = document.createElement("div");
+      breadcrumb.className = "breadcrumb-position-marker";
+
+      breadcrumb.style.left = x + "px";
+      breadcrumb.style.top = y + "px";
+      breadcrumb.dataset.x = x;
+      breadcrumb.dataset.y = y;
+      breadcrumb.dataset.latitude = currentCoords.latitude;
+      breadcrumb.dataset.longitude = currentCoords.longitude;
+      breadcrumbContainer.appendChild(breadcrumb);
+    }
+
+    document.getElementById("longitude").innerHTML = longitude.toFixed(6);
+    document.getElementById("latitude").innerHTML = latitude.toFixed(6);
+    document.getElementById("accuracy").innerHTML = currentCoords.accuracy.toFixed(2);
+    document.getElementById("translateX").innerHTML = translateX.toFixed(6);
+    document.getElementById("translateY").innerHTML = translateY.toFixed(6);
+    document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
+    document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
+    document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
+    document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
+    document.getElementById("mapX").innerHTML = x.toFixed(2);
+    document.getElementById("mapY").innerHTML = y.toFixed(2);
+    document.getElementById("gps-distance").innerHTML = gpsDistanceMeters.toFixed(2);
+
+    // Append the marker to the container
+    if (markerCreated) {
+      imageContainer.appendChild(lastPositionMarker);
+    }
+
+    const text = document.querySelector(".current-position-marker p");
+    text.innerText = getCoordsText(currentCoords);
+  } catch (e) {
+    debug(e);
   }
-  lastPositionMarker.className = "current-position-marker";
-
-  const lastBreadcrumbMarker = document.querySelector("#breadcrumb-container div:last-of-type");
-  const { latitude: latStr, longitude: longStr } = lastBreadcrumbMarker?.dataset || {};
-  const { latitude: markerLatitude = +latStr, longitude: markerLongitude = +longStr } = {};
-
-  const { latitude, longitude, accuracy } = currentCoords;
-
-  const gpsDistanceMeters = measure(latitude, longitude, +markerLatitude, +markerLongitude);
-
-  lastPositionMarker.dataset.latitude = latitude;
-  lastPositionMarker.dataset.longitude = longitude;
-
-  // Set the marker's position based on rotation and scale
-  const translateX = longitude - gpsLongitude; // translate to a known point
-  const translateY = latitude - gpsLatitude;
-  const rotateX = translateX * Math.cos(gpsToMapRotation) - translateY * Math.sin(gpsToMapRotation); // rotate the point
-  const rotateY = translateY * Math.cos(gpsToMapRotation) + translateX * Math.sin(gpsToMapRotation);
-  const scaleX = rotateX * gpsToMapScale; // scale to map units
-  const scaleY = rotateY * gpsToMapScale;
-  const x = scaleX + mapOriginX + imgOffsetX; // translate to map coordinates
-  const y = -scaleY + mapOriginY + imgOffsetY;
-
-  lastPositionMarker.style.left = x + "px";
-  lastPositionMarker.style.top = y + "px";
-  lastPositionMarker.dataset.x = x;
-  lastPositionMarker.dataset.y = y;
-
-  if (gpsDistanceMeters > accuracy || !lastBreadcrumbMarker) {
-    const breadcrumb = document.createElement("div");
-    breadcrumb.className = "breadcrumb-position-marker";
-
-    breadcrumb.style.left = x + "px";
-    breadcrumb.style.top = y + "px";
-    breadcrumb.dataset.x = x;
-    breadcrumb.dataset.y = y;
-    breadcrumb.dataset.latitude = currentCoords.latitude;
-    breadcrumb.dataset.longitude = currentCoords.longitude;
-    breadcrumbContainer.appendChild(breadcrumb);
-  }
-
-  document.getElementById("longitude").innerHTML = longitude.toFixed(6);
-  document.getElementById("latitude").innerHTML = latitude.toFixed(6);
-  document.getElementById("accuracy").innerHTML = currentCoords.accuracy.toFixed(2);
-  document.getElementById("translateX").innerHTML = translateX.toFixed(6);
-  document.getElementById("translateY").innerHTML = translateY.toFixed(6);
-  document.getElementById("rotateX").innerHTML = rotateX.toFixed(6);
-  document.getElementById("rotateY").innerHTML = rotateY.toFixed(6);
-  document.getElementById("scaleX").innerHTML = scaleX.toFixed(4);
-  document.getElementById("scaleY").innerHTML = scaleY.toFixed(4);
-  document.getElementById("mapX").innerHTML = x.toFixed(2);
-  document.getElementById("mapY").innerHTML = y.toFixed(2);
-
-  // Append the marker to the container
-  if (markerCreated) {
-    imageContainer.appendChild(lastPositionMarker);
-  }
-
-  const text = document.querySelector(".current-position-marker p");
-  text.innerText = getCoordsText(currentCoords);
 }
-
-let markerId = 0;
-
-// Get the image element and container
-const section = document.getElementById("section");
-const image = document.getElementById("image");
-const imageContainer = document.getElementById("image-container");
-const breadcrumbContainer = document.getElementById("breadcrumb-container");
 
 const appendRefPoint = (clientX, clientY, coords) => {
   // Create a marker element
@@ -227,7 +231,6 @@ const plotPoint = (clientX, clientY, coords) => {
   }
   catch (e) {
     debug(e);
-
   }
 }
 
@@ -306,40 +309,3 @@ if (!navigator.geolocation) {
 
   !debugGps && navigator.geolocation.watchPosition((p) => plotCurrentPosition(p.coords), error, options);
 }
-
-let coord;
-let screen;
-
-debugGps && document.addEventListener('keydown', (e) => {
-
-  const x1 = -71.514;
-  const x2 = -71.513;
-  const x3 = -71.512;
-  const y1 = 42.936;
-  const y2 = 42.937;
-  const y3 = 42.938;
-
-  switch (e.key) {
-    case '1': plotPoint(100, 100, coord); break;
-    case '2': plotPoint(100, 50, coord); break;
-
-      42.9374444, -71.5138986
-    case 'q': coord = { longitude: x1, latitude: y1, accuracy: 1 }; screen = { x: 100, y: 100 }; break;
-    case 'w': coord = { longitude: x2, latitude: y1, accuracy: 1 }; screen = { x: 150, y: 100 }; break;
-    case 'e': coord = { longitude: x3, latitude: y1, accuracy: 1 }; screen = { x: 200, y: 100 }; break;
-
-    case 'a': coord = { longitude: x1, latitude: y2, accuracy: 1 }; screen = { x: 100, y: 150 }; break;
-    case 's': coord = { longitude: x2, latitude: y2, accuracy: 1 }; screen = { x: 150, y: 150 }; break;
-    case 'd': coord = { longitude: x3, latitude: y2, accuracy: 1 }; screen = { x: 200, y: 150 }; break;
-
-    case 'z': coord = { longitude: x1, latitude: y3, accuracy: 1 }; screen = { x: 100, y: 200 }; break;
-    case 'x': coord = { longitude: x2, latitude: y3, accuracy: 1 }; screen = { x: 150, y: 200 }; break;
-    case 'c': coord = { longitude: x3, latitude: y3, accuracy: 1 }; screen = { x: 200, y: 200 }; break;
-
-    case 'p': plotCurrentPosition(coord); break;
-    case 'o':
-      console.log(screen, coord);
-      plotPoint(screen.x, screen.y, coord);
-      break;
-  }
-});

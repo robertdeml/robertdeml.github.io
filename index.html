@@ -46,6 +46,7 @@
       position: relative;
       left: 30px;
       color: red;
+      display: none;
     }
 
     .current-position-marker {
@@ -62,13 +63,14 @@
       position: relative;
       left: 30px;
       color: lime;
+      display: none;
     }
 
     .breadcrumb-position-marker {
       position: absolute;
       width: 10px;
       height: 10px;
-      background-color: green;
+      background-color: rgba(0, 128, 0, .4);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       z-index: 5;
@@ -117,10 +119,12 @@
   </div>
   <div class="point-data">
     <div>accuracy: <span id="accuracy"></span></div>
-    <div hidden>
-      <div id="debug"></div>
+    <div>GPS Distance: <span id="gps-distance"></span></div>
+    <div>count: <span id="posCount"></span></div>
+    <div id="debug"></div>
 
-      <div>count: <span id="posCount"></span></div>
+    <div hidden>
+
       <div>GPS: <span id="longitude"></span> <span id="latitude"></span></div>
       <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
       <div>Pt2: <span id="markerBLong"></span> <span id="markerBLat"></span> <span id="markerBAcc"></span></div>
