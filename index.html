@@ -96,6 +96,8 @@
     .move-point {
       font-size: 2rem;
     }
+
+    .controls {}
   </style>
 </head>
 
@@ -110,7 +112,9 @@
     <div>
       <button id="clear-footprints">Clear Footprints</button>
     </div>
-    <div>
+    <div id="controls">
+      <i class="bi bi-lock-fill" id="map-unlocked"></i>
+      <i class="bi bi-unlock-fill" id="map-locked"></i>
       <i class="bi bi-arrow-left-square move-point" id="point-left"></i>
       <i class="bi bi-arrow-up-square move-point" id="point-up"></i>
       <i class="bi bi-arrow-down-square move-point" id="point-down"></i>

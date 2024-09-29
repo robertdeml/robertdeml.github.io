@@ -12,6 +12,8 @@ let imgOffsetY = 0;
 let positionCount = 0;
 let markerId = 0;
 
+let lockMapState = false;
+
 // Get the image element and container
 const section = document.getElementById("section");
 const image = document.getElementById("image");
@@ -253,12 +255,25 @@ function movePoint(x, y) {
 function clearFootprints() {
   document.getElementById('breadcrumb-container').replaceChildren();
 }
-
+const mapUnlockedEl = document.getElementById('map-unlocked');
+const mapLockedEl = document.getElementById('map-locked');
+function unlockMap() {
+  lockMapState = false;
+  mapUnlockedEl.classList.remove('hidden');
+  mapLockedEl.classList.add('hidden');
+}
+function lockMap() {
+  lockMapState = true;
+  mapLockedEl.classList.remove('hidden');
+  mapUnlockedEl.classList.add('hidden');
+}
+unlockMap();
 function attachClickHandler(image) {
   const rect = document.querySelector('#image-container').getBoundingClientRect();
   imgOffsetX = rect.x;
   imgOffsetY = rect.y;
   image.addEventListener("click", (e) => {
+    if (lockMapState) return;
     imageClickHandler(e.clientX - imgOffsetX, e.clientY - imgOffsetY);
   });
   document.querySelector("#clear-footprints").addEventListener('click', () => clearFootprints());
@@ -266,6 +281,9 @@ function attachClickHandler(image) {
   document.querySelector("#point-down").addEventListener('click', () => movePoint(0, 1));
   document.querySelector("#point-left").addEventListener('click', () => movePoint(-1, 0));
   document.querySelector("#point-right").addEventListener('click', () => movePoint(1, 0));
+
+  document.querySelector("#map-locked").addEventListener('click', () => unlockMap());
+  document.querySelector("#map-unlocked").addEventListener('click', () => lockMap());
 };
 
 /**
