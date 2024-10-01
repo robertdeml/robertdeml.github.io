@@ -104,8 +104,6 @@
       font-size: 1.5rem;
     }
 
-    .controls {}
-
     .bordered-icon {
       /* text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000; */
       border: solid 2px black;
@@ -115,16 +113,27 @@
     i {
       cursor: pointer;
     }
+
+    #imageInput {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
-  <input id="imageInput" type="file" accept="image/*" capture="environment">
   <div class="section" id="section">
     <div class="image-container" id="image-container"></div>
     <div class="current-position-container"></div>
     <div id="breadcrumb-container"></div>
   </div>
+
+  <div class="position-absolute top-0 start-0">
+    <label for="imageInput">
+      <i class="bi bi-camera-fill"></i>
+    </label>
+    <input id="imageInput" type="file" accept="image/*" capture="environment">
+  </div>
+
   <div class="point-controls">
     <div>
     </div>
@@ -184,16 +193,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>First, touch on the map where you know you are.
+          <p>
+            Touch the camera icon to take a picture of a map. This can be a trailhead map, a mall map, or a cartoon
+            drawing.</p>
+          <p>Touch on the map where you know you are.
             A red dot will appear to mark the first reference point.
             You can adjust where the point it by pressing on the arrows.</p>
-          <p>Next, walk to another spot on the map that you know it's location.
+          <p>Walk to another spot on the map that you know it's location.
             Touch the map at this location.
             Adjust the second red dot with the arrows.</p>
           <p>Given these 2 points a bright green dot will show your current location.
             As you walk around, dark green dots will mark your path.</p>
-          <p>Touch the lock icon to prevent inadvertent touches that will set new reference points.</p>
-          <p>Touch the unlock icon to allow a new refernece point.
+          <p>Lock the map to prevent inadvertent touches that will set new reference points.</p>
+          <p>Touch the map allow a new refernece point.
             The oldest reference point will be dropped and your location will be based on the last 2 reference points.
           </p>
         </div>
@@ -201,8 +213,6 @@
     </div>
   </div>
 
-  <script>
-  </script>
   <script src="debug.js"></script>
   <script src="map.js"></script>
   <script src="camera.js"></script>

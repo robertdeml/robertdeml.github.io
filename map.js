@@ -99,7 +99,9 @@ const plotCurrentPosition = (currentCoords) => {
     lastPositionMarker.dataset.x = x;
     lastPositionMarker.dataset.y = y;
 
-    if (gpsDistanceMeters > accuracy || !lastBreadcrumbMarker) {
+    const numOfMarkers = document.querySelectorAll('.marker').length;
+
+    if ((gpsDistanceMeters > accuracy || !lastBreadcrumbMarker) && numOfMarkers >= 2) {
       const breadcrumb = document.createElement("div");
       breadcrumb.className = "breadcrumb-position-marker";
 
