@@ -255,19 +255,11 @@ function movePoint(x, y) {
 function clearFootprints() {
   document.getElementById('breadcrumb-container').replaceChildren();
 }
-const mapUnlockedEl = document.getElementById('map-unlocked');
-const mapLockedEl = document.getElementById('map-locked');
-function unlockMap() {
-  lockMapState = false;
-  mapUnlockedEl.classList.remove('hidden');
-  mapLockedEl.classList.add('hidden');
+
+function toggleMapLock(e) {
+  lockMapState = e.target.checked;
 }
-function lockMap() {
-  lockMapState = true;
-  mapLockedEl.classList.remove('hidden');
-  mapUnlockedEl.classList.add('hidden');
-}
-unlockMap();
+
 function attachClickHandler(image) {
   const rect = document.querySelector('#image-container').getBoundingClientRect();
   imgOffsetX = rect.x;
@@ -282,8 +274,7 @@ function attachClickHandler(image) {
   document.querySelector("#point-left").addEventListener('click', () => movePoint(-1, 0));
   document.querySelector("#point-right").addEventListener('click', () => movePoint(1, 0));
 
-  document.querySelector("#map-locked").addEventListener('click', () => unlockMap());
-  document.querySelector("#map-unlocked").addEventListener('click', () => lockMap());
+  document.querySelector("#lockUnlockSwitch").addEventListener('change', (e) => toggleMapLock(e));
 };
 
 /**

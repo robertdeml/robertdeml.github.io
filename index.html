@@ -131,9 +131,15 @@
     <div id="controls" class="d-flex align-items-center">
       <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#instruction=modal"><i
           class="bi bi-question"></i></button>
-      <button class="btn btn-warning" id="clear-footprints"><i class="bi bi-arrow-clockwise"></i></button>
-      <button class="btn btn-primary" id="map-unlocked"><i class="bi bi-lock-fill"></i></button>
-      <button class="btn btn-primary" id="map-locked"><i class="bi bi-unlock-fill"></i></button>
+
+      <div class="form-check form-switch p-0">
+        <div class="d-inline-flex flex-row-reverse gap-1">
+          <label class="form-check-label" for="switchCheckLabelStart"><i class="bi bi-lock-fill"></i></label>
+          <input class="form-check-input ms-0" type="checkbox" role="switch" id="lockUnlockSwitch" />
+          <label class="form-check-label" for="switchCheckLabelStart"><i class="bi bi-unlock-fill"></i></label>
+        </div>
+      </div> <button class="btn btn-warning" id="clear-footprints"><i class="bi bi-arrow-clockwise"></i></button>
+
       <div id="move-point-ctls" class="d-flex align-items-center">
         <button class="btn btn-secondary"><i class="bi bi-arrow-left move-point" id="point-left"></i></button>
         <div class="d-flex flex-column">
@@ -146,11 +152,11 @@
   </div>
   <div class="point-data">
     <div>accuracy: <span id="accuracy"></span></div>
-    <div>GPS Distance: <span id="gps-distance"></span></div>
-    <div>count: <span id="posCount"></span></div>
-    <div id="debug"></div>
 
     <div hidden>
+      <div>GPS Distance: <span id="gps-distance"></span></div>
+      <div>count: <span id="posCount"></span></div>
+      <div id="debug"></div>
 
       <div>GPS: <span id="longitude"></span> <span id="latitude"></span></div>
       <div>Pt1: <span id="markerALong"></span> <span id="markerALat"></span> <span id="markerAAcc"></span></div>
