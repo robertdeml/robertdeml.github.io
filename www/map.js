@@ -70,6 +70,11 @@ const plotCurrentPosition = (currentCoords) => {
       lastPositionMarker = document.createElement("div");
       const text = document.createElement('p');
       lastPositionMarker.appendChild(text);
+
+      const star = document.createElement('span');
+      star.classList.add('bi');
+      star.classList.add('bi-star-fill');
+      lastPositionMarker.appendChild(star);
     }
     lastPositionMarker.className = "current-position-marker";
 
@@ -104,6 +109,8 @@ const plotCurrentPosition = (currentCoords) => {
     if ((gpsDistanceMeters > accuracy || !lastBreadcrumbMarker) && numOfMarkers >= 2) {
       const breadcrumb = document.createElement("div");
       breadcrumb.className = "breadcrumb-position-marker";
+      breadcrumb.classList.add('bi');
+      breadcrumb.classList.add('bi-star-fill');
 
       breadcrumb.style.left = x + "px";
       breadcrumb.style.top = y + "px";
