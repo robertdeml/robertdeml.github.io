@@ -64,7 +64,9 @@
     }
 
     .current-position-marker span {
-      transform: translate(-50%, -50%);
+      position: relative;
+      top: -8px;
+      left: -6px;
     }
 
     .current-position-marker p {
@@ -82,6 +84,12 @@
       /* border-radius: 50%; */
       transform: translate(-50%, -50%);
       z-index: 5;
+    }
+
+    .breadcrumb-position-marker span {
+      position: relative;
+      top: -8px;
+      left: -6px;
     }
 
     .point-data {
@@ -129,17 +137,21 @@
     <div id="breadcrumb-container"></div>
   </div>
 
-  <div class="position-absolute top-0 start-0">
-    <label for="imageInput">
-      <i class="bi bi-camera-fill"></i>
-    </label>
-    <input id="imageInput" type="file" accept="image/*" capture="environment">
-  </div>
+  <!-- <div class="position-absolute top-0 start-0">
+    
+  </div> -->
 
   <div class="point-controls">
-    <div>
-    </div>
+
     <div id="controls" class="d-flex align-items-center">
+      <div>
+        <button class="btn btn-primary">
+          <label for="imageInput">
+            <i class="bi bi-camera-fill"></i>
+          </label>
+        </button>
+        <input id="imageInput" type="file" accept="image/*" capture="environment">
+      </div>
       <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#instruction=modal"><i
           class="bi bi-question"></i></button>
 
@@ -149,8 +161,8 @@
           <input class="form-check-input ms-0" type="checkbox" role="switch" id="lockUnlockSwitch" />
           <label class="form-check-label" for="switchCheckLabelStart"><i class="bi bi-unlock-fill"></i></label>
         </div>
-      </div> <button class="btn btn-warning" id="clear-footprints"><i class="bi bi-arrow-clockwise"></i></button>
-
+      </div>
+      <button class="btn btn-warning" id="clear-footprints"><i class="bi bi-arrow-clockwise"></i></button>
       <div id="move-point-ctls" class="d-flex align-items-center">
         <button class="btn btn-secondary"><i class="bi bi-arrow-left move-point" id="point-left"></i></button>
         <div class="d-flex flex-column">
