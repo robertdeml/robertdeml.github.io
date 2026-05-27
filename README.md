@@ -2,6 +2,8 @@
 
 A web app for hiking adventures.
 
+1
+
 ## Setup
 
 ```
