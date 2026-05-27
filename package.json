@@ -1,0 +1,33 @@
+{
+  "name": "hikenow",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm-run-all -s build:*",
+    "build:ts": "tsc",
+    "build:html": "copyfiles -u 1 web/**/* dist && copyfiles -f node_modules\\lucide\\dist\\umd\\lucide.js node_modules\\@floating-ui\\dom\\dist\\floating-ui.dom.umd.js node_modules\\@floating-ui\\core\\dist\\floating-ui.core.umd.js dist",
+    "watch": "npm-run-all -p watch:*",
+    "watch:ts": "tsc --watch",
+    "watch:html": "onchange \"web/**\" -- npm run build:html",
+    "start:server": "serve dist -p 3000",
+    "start:proxy": "local-ssl-proxy --source 3001 --target 3000",
+    "start": "npm-run-all -p start:*",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "copyfiles": "^2.4.1",
+    "local-ssl-proxy": "^2.0.5",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^7.1.0",
+    "serve": "^14.2.6",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.6",
+    "lucide": "^1.14.0"
+  }
+}
