@@ -15,6 +15,7 @@ overlay?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(fals
 let watchId: number | null = null;
 let lastGps: { lat: string; lng: string; acc: string } | null = null;
 let gpsPin: SVGElement | null = null;
+let gpsAccCircle: SVGSVGElement | null = null;
 let lastFpLat: number | null = null;
 let lastFpLng: number | null = null;
 const compassBtn = document.getElementById("compassBtn");
@@ -34,7 +35,7 @@ if (navigator.geolocation && compassBtn) {
     lastGps = null;
     lastFpLat = null;
     lastFpLng = null;
-    if (gpsPin) { gpsPin.remove(); gpsPin = null; }
+    removeGpsPin();
     menuBtn?.classList.remove("active");
     compassBtn?.classList.remove("active");
     statusEl.style.display = "none";
@@ -73,7 +74,7 @@ if (navigator.geolocation && compassBtn) {
           lastFpLat = curLat;
           lastFpLng = curLng;
         }
-        updateGpsPin(pos.coords.latitude, pos.coords.longitude);
+        updateGpsPin(pos.coords.latitude, pos.coords.longitude, lastGps.acc);
         statusEl.textContent = `${lastGps.lat}, ${lastGps.lng}  ±${lastGps.acc}m`;
         const gp = gpsPin;
         if (gp) {
@@ -131,8 +132,8 @@ function updateDebugGps() {
     lastFpLat = lat;
     lastFpLng = lng;
   }
-  updateGpsPin(lat, lng);
   const acc = parseFloat(debugAccInput.value) || 10;
+  updateGpsPin(lat, lng, acc.toFixed(0));
   statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m`;
   const gp = gpsPin;
   if (gp) {
@@ -153,14 +154,14 @@ if (testBtn) {
       if (watchId !== null && lastGps) {
         const lat = parseFloat(lastGps.lat);
         const lng = parseFloat(lastGps.lng);
-        updateGpsPin(lat, lng);
+        updateGpsPin(lat, lng, lastGps.acc);
         statusEl.textContent = `${lastGps.lat}, ${lastGps.lng}  ±${lastGps.acc}m`;
         const gp2 = gpsPin;
         if (gp2) {
           statusEl.textContent += `  (${parseFloat(gp2.style.left).toFixed(0)}, ${parseFloat(gp2.style.top).toFixed(0)})`;
         }
       } else {
-        if (gpsPin) { gpsPin.remove(); gpsPin = null; }
+        removeGpsPin();
         statusEl.style.display = "none";
       }
     }
@@ -182,7 +183,7 @@ fileInput.addEventListener("change", () => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    if (gpsPin) { gpsPin.remove(); gpsPin = null; }
+    removeGpsPin();
     lastFpLat = null;
     lastFpLng = null;
     document.body.style.backgroundImage = `url(${reader.result})`;
@@ -320,12 +321,38 @@ function gpsToPixel(lat: number, lng: number) {
   };
 }
 
-function updateGpsPin(lat: number, lng: number) {
+function removeGpsPin() {
+  if (gpsPin) { gpsPin.remove(); gpsPin = null; }
+  if (gpsAccCircle) { gpsAccCircle.remove(); gpsAccCircle = null; }
+}
+
+function updateGpsPin(lat: number, lng: number, acc?: string) {
   const pos = gpsToPixel(lat, lng);
   if (!pos) return;
-  if (gpsPin) gpsPin.remove();
+  removeGpsPin();
   gpsPin = createPinSvg(pos.x, pos.y, "#22c55e", false);
   pinContainer.appendChild(gpsPin);
+
+  if (acc) {
+    const accNum = parseFloat(acc);
+    if (!isNaN(accNum)) {
+      const r = accToPixelRadius(accNum, lat);
+      const ns = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(ns, "svg");
+      svg.style.cssText = `position:absolute;left:${pos.x - r - 5}px;top:${pos.y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
+      const circle = document.createElementNS(ns, "circle");
+      circle.setAttribute("cx", (r + 5).toString());
+      circle.setAttribute("cy", (r + 5).toString());
+      circle.setAttribute("r", Math.max(r, 2).toString());
+      circle.style.fill = "rgba(34, 197, 94, 0.1)";
+      circle.style.stroke = "#22c55e";
+      circle.style.strokeWidth = "1.5";
+      circle.style.strokeDasharray = "4 3";
+      svg.appendChild(circle);
+      pinContainer.appendChild(svg);
+      gpsAccCircle = svg;
+    }
+  }
 }
 
 function accToPixelRadius(accMeters: number, lat: number): number {
@@ -546,7 +573,9 @@ document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
 
 pinToolbar.querySelector("[data-trash]")?.addEventListener("click", (e) => {
   e.stopPropagation();
-  activePin?.remove();
+  if (!activePin) return;
+  hideAccuracyCircle(activePin);
+  activePin.remove();
   hideToolbar();
   refreshAccuracyCircles();
 });
