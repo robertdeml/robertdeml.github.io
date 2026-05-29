@@ -46,6 +46,7 @@
   <div id="debugPanel" class="debug-panel hidden">
     <label>Lat: <input type="number" id="debugLat" step="0.01" value="42.9"></label>
     <label>Lon: <input type="number" id="debugLon" step="0.01" value="-71.5"></label>
+    <label>Acc: <input type="number" id="debugAcc" step="1" value="20" style="width:60px"> m</label>
   </div>
 
   <div class="buttons-panel" id="buttonsPanel">
@@ -83,6 +84,15 @@
       </div>
       <div id="pinGpsInfo" class="pin-gps-info"></div>
       <button id="copyGpsBtn" title="Copy to clipboard"><span data-lucide="clipboard-copy"></span></button>
+    </div>
+    <div id="gpsAdjRow" class="row" style="display:none;align-items:center;gap:4px;padding:2px 4px;font-family:monospace;font-size:11px">
+      <button data-gps-adj="lat+" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lat +1m">N</button>
+      <span id="pinAdjLat" style="min-width:70px;text-align:center">0.000000</span>
+      <button data-gps-adj="lat-" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lat -1m">S</button>
+      <span style="color:#ccc">│</span>
+      <button data-gps-adj="lng+" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lng +1m">E</button>
+      <span id="pinAdjLng" style="min-width:70px;text-align:center">0.000000</span>
+      <button data-gps-adj="lng-" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lng -1m">W</button>
     </div>
     <button data-trash><span data-lucide="trash-2"></span></button>
   </div>

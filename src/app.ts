@@ -106,6 +106,7 @@ const testBtn = document.getElementById("testBtn");
 const debugPanel = document.getElementById("debugPanel") as HTMLDivElement;
 const debugLatInput = document.getElementById("debugLat") as HTMLInputElement;
 const debugLonInput = document.getElementById("debugLon") as HTMLInputElement;
+const debugAccInput = document.getElementById("debugAcc") as HTMLInputElement;
 
 function updateDebugGps() {
   const lat = parseFloat(debugLatInput.value);
@@ -131,7 +132,8 @@ function updateDebugGps() {
     lastFpLng = lng;
   }
   updateGpsPin(lat, lng);
-  statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±10m`;
+  const acc = parseFloat(debugAccInput.value) || 10;
+  statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m`;
   const gp = gpsPin;
   if (gp) {
     statusEl.textContent += `  (${parseFloat(gp.style.left).toFixed(0)}, ${parseFloat(gp.style.top).toFixed(0)})`;
@@ -168,6 +170,7 @@ if (testBtn) {
 debugPanel.addEventListener("click", (e) => e.stopPropagation());
 debugLatInput.addEventListener("input", updateDebugGps);
 debugLonInput.addEventListener("input", updateDebugGps);
+debugAccInput.addEventListener("input", updateDebugGps);
 
 const cameraBtn = document.querySelector('button:has([data-lucide="camera"])');
 const fileInput = document.getElementById("cameraInput") as HTMLInputElement;
@@ -204,6 +207,8 @@ function createPinSvg(x: number, y: number, color: string, clickable: boolean, g
     svg.dataset.lat = gps.lat;
     svg.dataset.lng = gps.lng;
     svg.dataset.acc = gps.acc;
+    svg.dataset.adjLat = gps.lat;
+    svg.dataset.adjLng = gps.lng;
   }
   svg.style.fill = color;
   svg.style.stroke = "none";
@@ -228,6 +233,7 @@ function createPinSvg(x: number, y: number, color: string, clickable: boolean, g
 function placePin(x: number, y: number, gps?: { lat: string; lng: string; acc: string }) {
   const svg = createPinSvg(x, y, "#FF5A00", true, gps);
   pinContainer.appendChild(svg);
+  refreshAccuracyCircles();
 }
 
 function placeFootprint(gpsLat: number, gpsLng: number) {
@@ -272,8 +278,8 @@ function getRefPins() {
   pinContainer.querySelectorAll("svg[data-lat]").forEach((svg) => {
     const el = svg as SVGElement;
     refs.push({
-      lat: parseFloat(el.dataset.lat!),
-      lng: parseFloat(el.dataset.lng!),
+      lat: parseFloat(el.dataset.adjLat ?? el.dataset.lat!),
+      lng: parseFloat(el.dataset.adjLng ?? el.dataset.lng!),
       x: parseFloat(el.style.left),
       y: parseFloat(el.style.top),
     });
@@ -281,16 +287,11 @@ function getRefPins() {
   return refs;
 }
 
-function gpsToPixel(lat: number, lng: number) {
+function getTransformCoeffs() {
   const refs = getRefPins();
   if (refs.length < 2) return null;
-
-  const match = refs.find((p) => Math.abs(p.lat - lat) < 1e-8 && Math.abs(p.lng - lng) < 1e-8);
-  if (match) return { x: match.x, y: match.y };
-
   const [p0] = refs;
   let sumA = 0, sumB = 0, sumW = 0;
-
   for (let i = 1; i < refs.length; i++) {
     const p = refs[i];
     const dLat = p.lat - p0.lat;
@@ -299,16 +300,18 @@ function gpsToPixel(lat: number, lng: number) {
     const dY = p.y - p0.y;
     const denom = dLat * dLat + dLng * dLng;
     if (denom < 1e-12) continue;
-    const w = 1;
-    sumA += w * (dX * dLat + dY * dLng) / denom;
-    sumB += w * (dY * dLat - dX * dLng) / denom;
-    sumW += w;
+    sumA += (dX * dLat + dY * dLng) / denom;
+    sumB += (dY * dLat - dX * dLng) / denom;
+    sumW += 1;
   }
-
   if (sumW < 0.5) return null;
-  const a = sumA / sumW;
-  const b = sumB / sumW;
+  return { a: sumA / sumW, b: sumB / sumW, p0 };
+}
 
+function gpsToPixel(lat: number, lng: number) {
+  const coeffs = getTransformCoeffs();
+  if (!coeffs) return null;
+  const { a, b, p0 } = coeffs;
   const dLat = lat - p0.lat;
   const dLng = lng - p0.lng;
   return {
@@ -324,6 +327,118 @@ function updateGpsPin(lat: number, lng: number) {
   gpsPin = createPinSvg(pos.x, pos.y, "#22c55e", false);
   pinContainer.appendChild(gpsPin);
 }
+
+function accToPixelRadius(accMeters: number, lat: number): number {
+  const coeffs = getTransformCoeffs();
+  if (!coeffs) return 10;
+  const { a, b } = coeffs;
+  return Math.sqrt(a * a + b * b) * accMeters / 111320;
+}
+
+function getMetersPerDeg(lat: number) {
+  const mPerDegLat = 111320;
+  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
+  return { mPerDegLat, mPerDegLng };
+}
+
+function showAccuracyCircle(pin: SVGElement) {
+  hideAccuracyCircle(pin);
+  const acc = parseFloat(pin.dataset.acc ?? "");
+  const adjLat = parseFloat(pin.dataset.adjLat ?? pin.dataset.lat ?? "");
+  if (isNaN(acc) || isNaN(adjLat)) return;
+  const x = parseFloat(pin.style.left);
+  const y = parseFloat(pin.style.top);
+  const r = accToPixelRadius(acc, adjLat);
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.style.cssText = `position:absolute;left:${x - r - 5}px;top:${y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
+  const circle = document.createElementNS(ns, "circle");
+  circle.setAttribute("cx", (r + 5).toString());
+  circle.setAttribute("cy", (r + 5).toString());
+  circle.setAttribute("r", Math.max(r, 2).toString());
+  circle.style.fill = "rgba(255, 90, 0, 0.08)";
+  circle.style.stroke = "#FF5A00";
+  circle.style.strokeWidth = "1.5";
+  circle.style.strokeDasharray = "4 3";
+  svg.appendChild(circle);
+  pinContainer.appendChild(svg);
+  (pin as any)._accCircle = svg;
+}
+
+function hideAccuracyCircle(pin?: SVGElement) {
+  if (pin) {
+    const svg = (pin as any)._accCircle;
+    if (svg) { svg.remove(); delete (pin as any)._accCircle; }
+  } else {
+    pinContainer.querySelectorAll("svg[data-lat]").forEach(p => hideAccuracyCircle(p as SVGElement));
+  }
+}
+
+function refreshAccuracyCircles() {
+  const hasTransform = getTransformCoeffs() !== null;
+  pinContainer.querySelectorAll("svg[data-lat]").forEach(p => {
+    const pin = p as SVGElement;
+    if (hasTransform) {
+      showAccuracyCircle(pin);
+    } else {
+      hideAccuracyCircle(pin);
+    }
+  });
+}
+
+const gpsAdjRow = document.getElementById("gpsAdjRow") as HTMLDivElement;
+const pinAdjLatEl = document.getElementById("pinAdjLat") as HTMLSpanElement;
+const pinAdjLngEl = document.getElementById("pinAdjLng") as HTMLSpanElement;
+
+function clampAndApplyGps(pin: SVGElement, newAdjLat: number, newAdjLng: number) {
+  const origLat = parseFloat(pin.dataset.lat!);
+  const origLng = parseFloat(pin.dataset.lng!);
+  const acc = parseFloat(pin.dataset.acc!);
+  const { mPerDegLat, mPerDegLng } = getMetersPerDeg(origLat);
+  const maxDlat = acc / mPerDegLat;
+  const maxDlng = acc / mPerDegLng;
+  newAdjLat = Math.max(origLat - maxDlat, Math.min(origLat + maxDlat, newAdjLat));
+  newAdjLng = Math.max(origLng - maxDlng, Math.min(origLng + maxDlng, newAdjLng));
+
+  const coeffs = getTransformCoeffs();
+  if (coeffs) {
+    const { a, b, p0 } = coeffs;
+    const dLat = newAdjLat - p0.lat;
+    const dLng = newAdjLng - p0.lng;
+    pin.style.left = `${p0.x + a * dLat - b * dLng}px`;
+    pin.style.top = `${p0.y + b * dLat + a * dLng}px`;
+  }
+
+  pin.dataset.adjLat = newAdjLat.toFixed(6);
+  pin.dataset.adjLng = newAdjLng.toFixed(6);
+  refreshAccuracyCircles();
+  showToolbar(pin);
+}
+
+function updateAdjDisplay(pin: SVGElement) {
+  pinAdjLatEl.textContent = pin.dataset.adjLat ?? pin.dataset.lat ?? "";
+  pinAdjLngEl.textContent = pin.dataset.adjLng ?? pin.dataset.lng ?? "";
+}
+
+gpsAdjRow?.querySelectorAll("[data-gps-adj]").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!activePin || !activePin.dataset.lat) return;
+    const dir = (btn as HTMLElement).dataset.gpsAdj!;
+    const origLat = parseFloat(activePin.dataset.lat!);
+    const { mPerDegLat, mPerDegLng } = getMetersPerDeg(origLat);
+    const step = 1;
+    let adjLat = parseFloat(activePin.dataset.adjLat ?? activePin.dataset.lat!);
+    let adjLng = parseFloat(activePin.dataset.adjLng ?? activePin.dataset.lng!);
+    switch (dir) {
+      case "lat+": adjLat += step / mPerDegLat; break;
+      case "lat-": adjLat -= step / mPerDegLat; break;
+      case "lng+": adjLng += step / mPerDegLng; break;
+      case "lng-": adjLng -= step / mPerDegLng; break;
+    }
+    clampAndApplyGps(activePin, adjLat, adjLng);
+  });
+});
 
 let mapMode = false;
 const mapBtn = document.getElementById("mapBtn");
@@ -346,7 +461,8 @@ document.body.addEventListener("click", (e: MouseEvent) => {
     const lat = parseFloat(debugLatInput.value);
     const lng = parseFloat(debugLonInput.value);
     if (!isNaN(lat) && !isNaN(lng)) {
-      gps = { lat: lat.toFixed(6), lng: lng.toFixed(6), acc: "10" };
+      const acc = parseFloat(debugAccInput.value) || 10;
+      gps = { lat: lat.toFixed(6), lng: lng.toFixed(6), acc: acc.toFixed(0) };
     }
   }
   placePin(e.clientX, e.clientY, gps);
@@ -372,13 +488,19 @@ function showToolbar(pin: SVGElement) {
   if (pin.dataset.lat) {
     const x = parseFloat(pin.style.left).toFixed(0);
     const y = parseFloat(pin.style.top).toFixed(0);
-    pinGpsInfo.innerHTML = `<div>Lat: ${pin.dataset.lat}</div><div>Lon: ${pin.dataset.lng}</div><div>Acc: ±${pin.dataset.acc}m</div><div>X: ${x}  Y: ${y}</div>`;
+    const adjLat = pin.dataset.adjLat;
+    const adjLng = pin.dataset.adjLng;
+    const isAdj = adjLat !== pin.dataset.lat || adjLng !== pin.dataset.lng;
+    pinGpsInfo.innerHTML = `<div>Lat: ${pin.dataset.lat}${isAdj ? ` <span style="color:#FF5A00">→ ${adjLat}</span>` : ""}</div><div>Lon: ${pin.dataset.lng}${isAdj ? ` <span style="color:#FF5A00">→ ${adjLng}</span>` : ""}</div><div>Acc: ±${pin.dataset.acc}m</div><div>X: ${x}  Y: ${y}</div>`;
     pinGpsInfo.style.display = "flex";
     copyBtn.style.display = "";
+    gpsAdjRow.style.display = "flex";
+    updateAdjDisplay(pin);
   } else {
     pinGpsInfo.innerHTML = "";
     pinGpsInfo.style.display = "none";
     copyBtn.style.display = "none";
+    gpsAdjRow.style.display = "none";
   }
   FUI.computePosition(pin, pinToolbar, {
     placement: "right",
@@ -416,7 +538,9 @@ pinToolbar.addEventListener("click", (e) => e.stopPropagation());
 document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
   e.stopPropagation();
   if (!activePin || !activePin.dataset.lat) return;
-  const text = `Lat: ${activePin.dataset.lat}\nLon: ${activePin.dataset.lng}\nX: ${parseFloat(activePin.style.left).toFixed(0)}  Y: ${parseFloat(activePin.style.top).toFixed(0)}`;
+  const adjLat = activePin.dataset.adjLat ?? activePin.dataset.lat;
+  const adjLng = activePin.dataset.adjLng ?? activePin.dataset.lng;
+  const text = `Lat: ${activePin.dataset.lat}\nLon: ${activePin.dataset.lng}\nAdjLat: ${adjLat}\nAdjLng: ${adjLng}\nAcc: ±${activePin.dataset.acc}m\nX: ${parseFloat(activePin.style.left).toFixed(0)}  Y: ${parseFloat(activePin.style.top).toFixed(0)}`;
   navigator.clipboard.writeText(text);
 });
 
@@ -424,6 +548,7 @@ pinToolbar.querySelector("[data-trash]")?.addEventListener("click", (e) => {
   e.stopPropagation();
   activePin?.remove();
   hideToolbar();
+  refreshAccuracyCircles();
 });
 
 pinOverlay.addEventListener("click", (e) => {
