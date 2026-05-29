@@ -325,9 +325,22 @@ function updateGpsPin(lat: number, lng: number) {
   pinContainer.appendChild(gpsPin);
 }
 
+let mapMode = false;
+const mapBtn = document.getElementById("mapBtn");
+
+mapBtn?.addEventListener("click", () => {
+  mapMode = !mapMode;
+  mapBtn.classList.toggle("active", mapMode);
+  if (mapMode) {
+    menuBtn?.classList.add("active");
+  } else {
+    menuBtn?.classList.remove("active");
+  }
+});
+
 document.body.addEventListener("click", (e: MouseEvent) => {
   if (!document.body.style.backgroundImage) return;
-  if (watchId === null && !debugActive) return;
+  if (watchId === null && !debugActive && !mapMode) return;
   let gps = lastGps ?? undefined;
   if (debugActive) {
     const lat = parseFloat(debugLatInput.value);
