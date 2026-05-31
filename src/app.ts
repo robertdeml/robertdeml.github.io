@@ -12,6 +12,26 @@ menuBtn?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); }
 panel?.addEventListener("click", (e) => e.stopPropagation());
 overlay?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(false); });
 
+const infoBtn = document.getElementById("infoBtn");
+const infoDialog = document.getElementById("infoDialog");
+const infoOverlay = document.getElementById("infoOverlay");
+const infoCloseBtn = document.getElementById("infoCloseBtn");
+
+function toggleInfo(open?: boolean) {
+  const isOpen = open ?? !infoDialog?.classList.contains("open");
+  infoDialog?.classList.toggle("open", isOpen);
+  infoOverlay?.classList.toggle("open", isOpen);
+}
+
+infoBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleMenu(false);
+  toggleInfo(true);
+});
+infoDialog?.addEventListener("click", (e) => e.stopPropagation());
+infoCloseBtn?.addEventListener("click", () => toggleInfo(false));
+infoOverlay?.addEventListener("click", () => toggleInfo(false));
+
 let watchId: number | null = null;
 let lastGps: { lat: string; lng: string; acc: string } | null = null;
 let gpsPin: SVGElement | null = null;

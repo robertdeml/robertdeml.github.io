@@ -32,6 +32,16 @@
     .debug-panel input { width: 120px; font-family: monospace; font-size: 13px; }
     .icon-stack { position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
     .icon-stack .overlay { position: absolute; opacity: 0.85; }
+    .info-overlay { display: none; position: fixed; inset: 0; z-index: 25; background: rgba(0,0,0,0.4); }
+    .info-overlay.open { display: block; }
+    .info-dialog { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30; background: #fff; border-radius: 12px; padding: 24px; max-width: 420px; width: 85%; box-shadow: 0 4px 24px rgba(0,0,0,0.25); font-family: sans-serif; }
+    .info-dialog.open { display: block; }
+    .info-dialog h2 { margin: 0 0 16px; font-size: 18px; color: #FF5A00; text-align: center; }
+    .info-dialog .info-content { font-size: 13px; line-height: 1.6; color: #333; }
+    .info-dialog .info-content p { margin: 8px 0; }
+    .info-dialog .info-content strong { color: #111; }
+    #infoCloseBtn { display: block; margin: 20px auto 0; padding: 8px 24px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; color: #333; width: auto; height: auto; }
+    #infoCloseBtn:hover { background: #e9e9e9; }
   </style>
 </head>
 <body>
@@ -62,12 +72,28 @@
     <button id="testBtn" ><span data-lucide="bug"></span></button>
     <button id="mapBtn"><span data-lucide="map"></span></button>
     <button class="hidden"><span data-lucide="map-pin"></span></button>
+    <button id="infoBtn"><span data-lucide="info"></span></button>
     <button id="clearFpBtn">
       <div class="icon-stack">
         <span data-lucide="footprints" width="16" height="16"></span>
         <span data-lucide="ban" class="overlay"></span>
       </div>
     </button>
+  </div>
+
+  <div id="infoOverlay" class="info-overlay"></div>
+  <div id="infoDialog" class="info-dialog">
+    <h2>How to Use HikeNow</h2>
+    <div class="info-content">
+      <p><strong>📷 Camera</strong> — Overlay a photo as the map background. Tap anywhere to place a pin.</p>
+      <p><strong>🛰️ GPS</strong> — Track your position in real time. Footprints are left automatically along your path.</p>
+      <p><strong>🐛 Debug</strong> — Manually enter GPS coordinates for testing without a live signal.</p>
+      <p><strong>🗺️ Map Mode</strong> — Enables pin placement anywhere, even without GPS or a photo.</p>
+      <p><strong>📍 Pins</strong> — Click a placed pin to show its toolbar. Use arrow keys to nudge or N/S/E/W to adjust by 1 meter. Copy coordinates or delete the pin.</p>
+      <p><strong>👣 Clear Trail</strong> — Erase all footprints while keeping your reference pins.</p>
+      <p><strong>💡 Tip</strong> — Place at least two reference pins on features you recognize (trail junctions, landmarks) to enable GPS-to-pixel mapping and automatic footprint tracking.</p>
+    </div>
+    <button id="infoCloseBtn">Close</button>
   </div>
 
   <div id="pinOverlay" class="pin-overlay" style="display:none"></div>
