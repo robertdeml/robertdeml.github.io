@@ -18,6 +18,8 @@
     button { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; }
     button:hover { background: #e9e9e9; }
     .hidden { display: none; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:disabled:hover { background: #f9f9f9; }
     .pin-toolbar { position: fixed; z-index: 20; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .pin-toolbar .row { display: flex; gap: 2px; }
     .pin-toolbar button { width: 32px; height: 32px; }
@@ -69,7 +71,6 @@
     <button><span data-lucide="camera"></span></button>
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none">
     <button id="compassBtn" class="hidden"><span data-lucide="satellite"></span></button>
-    <button id="testBtn" ><span data-lucide="bug"></span></button>
     <button id="mapBtn"><span data-lucide="map"></span></button>
     <button class="hidden"><span data-lucide="map-pin"></span></button>
     <button id="infoBtn"><span data-lucide="info"></span></button>
@@ -79,6 +80,7 @@
         <span data-lucide="ban" class="overlay"></span>
       </div>
     </button>
+    <button id="testBtn"><span data-lucide="bug"></span></button>
   </div>
 
   <div id="infoOverlay" class="info-overlay"></div>

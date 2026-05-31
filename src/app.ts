@@ -121,6 +121,7 @@ if (navigator.geolocation && compassBtn) {
   });
 }
 
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 let debugActive = false;
 let debugInterval: ReturnType<typeof setInterval> | null = null;
 const testBtn = document.getElementById("testBtn");
@@ -128,6 +129,11 @@ const debugPanel = document.getElementById("debugPanel") as HTMLDivElement;
 const debugLatInput = document.getElementById("debugLat") as HTMLInputElement;
 const debugLonInput = document.getElementById("debugLon") as HTMLInputElement;
 const debugAccInput = document.getElementById("debugAcc") as HTMLInputElement;
+
+if (!isLocal) {
+  testBtn?.classList.add("hidden");
+  debugPanel?.classList.add("hidden");
+}
 
 function updateDebugGps() {
   const lat = parseFloat(debugLatInput.value);
@@ -161,7 +167,7 @@ function updateDebugGps() {
   }
 }
 
-if (testBtn) {
+if (testBtn && isLocal) {
   testBtn.addEventListener("click", () => {
     debugActive = !debugActive;
     testBtn.classList.toggle("active", debugActive);
@@ -188,10 +194,12 @@ if (testBtn) {
   });
 }
 
-debugPanel.addEventListener("click", (e) => e.stopPropagation());
-debugLatInput.addEventListener("input", updateDebugGps);
-debugLonInput.addEventListener("input", updateDebugGps);
-debugAccInput.addEventListener("input", updateDebugGps);
+if (isLocal) {
+  debugPanel.addEventListener("click", (e) => e.stopPropagation());
+  debugLatInput.addEventListener("input", updateDebugGps);
+  debugLonInput.addEventListener("input", updateDebugGps);
+  debugAccInput.addEventListener("input", updateDebugGps);
+}
 
 const cameraBtn = document.querySelector('button:has([data-lucide="camera"])');
 const fileInput = document.getElementById("cameraInput") as HTMLInputElement;
@@ -210,6 +218,7 @@ fileInput.addEventListener("change", () => {
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
+    updateButtonsDisabledState();
   };
   reader.readAsDataURL(file);
 });
@@ -499,6 +508,19 @@ mapBtn?.addEventListener("click", () => {
     menuBtn?.classList.remove("active");
   }
 });
+
+function updateButtonsDisabledState() {
+  const hasPhoto = !!document.body.style.backgroundImage;
+  if (compassBtn) {
+    if (hasPhoto) compassBtn.removeAttribute("disabled");
+    else compassBtn.setAttribute("disabled", "");
+  }
+  if (mapBtn) {
+    if (hasPhoto) mapBtn.removeAttribute("disabled");
+    else mapBtn.setAttribute("disabled", "");
+  }
+}
+updateButtonsDisabledState();
 
 document.body.addEventListener("click", (e: MouseEvent) => {
   if (!document.body.style.backgroundImage) return;
