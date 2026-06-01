@@ -1,13 +1,25 @@
+/* ============================================================
+ * debug — Simulated GPS input for local testing.
+ *
+ * Only available on localhost/127.0.0.1. Provides manual
+ * lat/lng/acc input fields that drive the same GPS pin
+ * and footprint logic as real GPS tracking.
+ * ============================================================ */
+
 import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, statusEl, isLocal } from "./state.js";
 import { gpsToPixel } from "./transform.js";
 import { placeFootprint } from "./pins.js";
 import { updateGpsPin, removeGpsPin } from "./gps.js";
 
+/* Hide debug controls on the live site; only show them locally. */
 if (!isLocal) {
   testBtn?.classList.add("hidden");
   debugPanel?.classList.add("hidden");
 }
 
+/** Reads the manual lat/lng/acc inputs, places footprints at
+ *  20px intervals, and updates the green GPS pin. Called on
+ *  each input change and every 1s while debug mode is active. */
 function updateDebugGps() {
   const lat = parseFloat(debugLatInput.value);
   const lng = parseFloat(debugLonInput.value);
@@ -40,6 +52,7 @@ function updateDebugGps() {
   }
 }
 
+/* --- Debug button: toggles simulated GPS mode --- */
 if (testBtn && isLocal) {
   testBtn.addEventListener("click", () => {
     st.debugActive = !st.debugActive;
@@ -67,6 +80,7 @@ if (testBtn && isLocal) {
   });
 }
 
+/* --- Wire live input events (local only) --- */
 if (isLocal) {
   debugPanel.addEventListener("click", (e) => e.stopPropagation());
   debugLatInput.addEventListener("input", updateDebugGps);

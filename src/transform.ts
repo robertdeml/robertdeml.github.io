@@ -1,5 +1,17 @@
+/* ============================================================
+ * transform — GPS-to-pixel affine transform math.
+ *
+ * Given 2+ GPS-tagged reference pins on the photo, computes
+ * a least-squares similarity transform (scale + rotation,
+ * no skew) that maps (lat,lng) → (x,y) pixel coordinates.
+ * ============================================================ */
+
 import { pinContainer } from "./state.js";
 
+const MAX_ACC_RADIUS_PX = 500;
+
+/** Iterates all reference pins (SVGs with data-lat) and returns
+ *  their adjusted GPS coords + pixel positions. */
 function getRefPins() {
   const refs: { lat: number; lng: number; x: number; y: number }[] = [];
   pinContainer.querySelectorAll("svg[data-lat]").forEach((svg) => {
@@ -14,6 +26,9 @@ function getRefPins() {
   return refs;
 }
 
+/** Computes affine transform coefficients from placed reference pins.
+ *  Returns null when fewer than 2 pins exist or all pins are co-located.
+ *  Uses least-squares over all pin-pairs relative to the first pin. */
 export function getTransformCoeffs() {
   const refs = getRefPins();
   if (refs.length < 2) return null;
@@ -35,6 +50,8 @@ export function getTransformCoeffs() {
   return { a: sumA / sumW, b: sumB / sumW, p0 };
 }
 
+/** Converts (lat,lng) to pixel (x,y) via the affine transform.
+ *  Returns null when the transform isn't ready (<2 reference pins). */
 export function gpsToPixel(lat: number, lng: number) {
   const coeffs = getTransformCoeffs();
   if (!coeffs) return null;
@@ -47,13 +64,18 @@ export function gpsToPixel(lat: number, lng: number) {
   };
 }
 
+/** Converts GPS accuracy (meters) to a pixel radius on screen.
+ *  Capped at MAX_ACC_RADIUS_PX to prevent over-sized circles. */
 export function accToPixelRadius(accMeters: number, lat: number): number {
   const coeffs = getTransformCoeffs();
   if (!coeffs) return 10;
   const { a, b } = coeffs;
-  return Math.sqrt(a * a + b * b) * accMeters / 111320;
+  const radius = Math.sqrt(a * a + b * b) * accMeters / 111320;
+  return Math.min(radius, MAX_ACC_RADIUS_PX);
 }
 
+/** Returns meters-per-degree for latitude and longitude at
+ *  a given latitude. Used for 1-meter GPS nudge calculations. */
 export function getMetersPerDeg(lat: number) {
   const mPerDegLat = 111320;
   const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);

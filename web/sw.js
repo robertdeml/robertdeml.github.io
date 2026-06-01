@@ -1,8 +1,14 @@
-const CACHE = "hikenow-v1";
+const CACHE = "hikenow-v2";
 const ASSETS = [
   "/",
   "index.html",
   "app.js",
+  "state.js",
+  "transform.js",
+  "pins.js",
+  "gps.js",
+  "debug.js",
+  "ui.js",
   "lucide.js",
   "floating-ui.core.umd.js",
   "floating-ui.dom.umd.js",

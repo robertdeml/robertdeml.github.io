@@ -1,3 +1,8 @@
+/* ============================================================
+ * state — Shared mutable state and DOM element references.
+ * All other modules import from here to read/write state.
+ * ============================================================ */
+
 export const menuBtn = document.querySelector('.menu-btn button');
 export const panel = document.getElementById("buttonsPanel");
 export const overlay = document.getElementById("menuOverlay");

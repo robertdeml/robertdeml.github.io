@@ -1,6 +1,19 @@
+/* ============================================================
+ * pins — Pin creation, placement, toolbar interaction, and
+ * accuracy circle rendering.
+ *
+ * Reference pins are placed by the user on recognizable
+ * features. Footprints are auto-dropped by GPS tracking.
+ * The pin toolbar shows GPS info, nudger arrows, NSEW
+ * 1-meter adjustments, copy, and delete.
+ * ============================================================ */
+
 import { st, pinContainer, pinToolbar, pinOverlay, pinGpsInfo, gpsAdjRow, pinAdjLatEl, pinAdjLngEl, FUI } from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 
+/** Creates an SVG location-pin element at (x,y).
+ *  If `gps` is provided, stores lat/lng/acc as data attributes.
+ *  `clickable` controls pointer-events and cursor. */
 export function createPinSvg(x: number, y: number, color: string, clickable: boolean, gps?: { lat: string; lng: string; acc: string }) {
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
@@ -34,12 +47,17 @@ export function createPinSvg(x: number, y: number, color: string, clickable: boo
   return svg;
 }
 
+/** Places an orange reference pin at (x,y) and refreshes
+ *  accuracy circles for all existing pins. */
 export function placePin(x: number, y: number, gps?: { lat: string; lng: string; acc: string }) {
   const svg = createPinSvg(x, y, "#FF5A00", true, gps);
   pinContainer.appendChild(svg);
   refreshAccuracyCircles();
 }
 
+/** Drops a footprint SVG at the GPS-coordinate-derived pixel position.
+ *  Called automatically by GPS tracking when the user moves
+ *  more than 20px from the previous footprint. */
 export function placeFootprint(gpsLat: number, gpsLng: number) {
   const pos = gpsToPixel(gpsLat, gpsLng);
   if (!pos) return;
@@ -77,6 +95,9 @@ export function placeFootprint(gpsLat: number, gpsLng: number) {
   pinContainer.appendChild(svg);
 }
 
+/** Shows a dashed accuracy circle around a GPS-tagged pin.
+ *  The radius is derived from the pin's accuracy (meters)
+ *  converted to pixels via the affine transform. */
 function showAccuracyCircle(pin: SVGElement) {
   hideAccuracyCircle(pin);
   const acc = parseFloat(pin.dataset.acc ?? "");
@@ -101,6 +122,8 @@ function showAccuracyCircle(pin: SVGElement) {
   (pin as any)._accCircle = svg;
 }
 
+/** Removes the accuracy circle SVG from a pin (or all pins).
+ *  Uses an expando _accCircle reference stored on the pin. */
 function hideAccuracyCircle(pin?: SVGElement) {
   if (pin) {
     const svg = (pin as any)._accCircle;
@@ -110,6 +133,8 @@ function hideAccuracyCircle(pin?: SVGElement) {
   }
 }
 
+/** Iterates all reference pins and shows/hides their accuracy
+ *  circles depending on whether the affine transform is ready. */
 function refreshAccuracyCircles() {
   const hasTransform = getTransformCoeffs() !== null;
   pinContainer.querySelectorAll("svg[data-lat]").forEach(p => {
@@ -122,10 +147,13 @@ function refreshAccuracyCircles() {
   });
 }
 
+/** Adjusts a pin's GPS coords within its accuracy bounds (clamped),
+ *  recalculates its pixel position, and refreshes the toolbar. */
 function clampAndApplyGps(pin: SVGElement, newAdjLat: number, newAdjLng: number) {
   const origLat = parseFloat(pin.dataset.lat!);
   const origLng = parseFloat(pin.dataset.lng!);
-  const acc = parseFloat(pin.dataset.acc!);
+  const acc = parseFloat(pin.dataset.acc ?? "0");
+  if (isNaN(acc) || acc <= 0) return;
   const { mPerDegLat, mPerDegLng } = getMetersPerDeg(origLat);
   const maxDlat = acc / mPerDegLat;
   const maxDlng = acc / mPerDegLng;
@@ -147,17 +175,22 @@ function clampAndApplyGps(pin: SVGElement, newAdjLat: number, newAdjLng: number)
   showToolbar(pin);
 }
 
+/** Updates the lat/lng display spans in the pin toolbar. */
 function updateAdjDisplay(pin: SVGElement) {
   pinAdjLatEl.textContent = pin.dataset.adjLat ?? pin.dataset.lat ?? "";
   pinAdjLngEl.textContent = pin.dataset.adjLng ?? pin.dataset.lng ?? "";
 }
 
+/** Hides the floating pin toolbar and clears activePin. */
 function hideToolbar() {
   pinToolbar.style.display = "none";
   pinOverlay.style.display = "none";
   st.activePin = null;
 }
 
+/** Shows the floating pin toolbar positioned next to the given pin.
+ *  Displays GPS data if the pin has it, or hides GPS section for
+ *  non-GPS pins (e.g. placed in Map Mode). */
 function showToolbar(pin: SVGElement) {
   st.activePin = pin;
   pinToolbar.style.display = "flex";
@@ -189,6 +222,8 @@ function showToolbar(pin: SVGElement) {
   });
 }
 
+/* --- Event listeners --- */
+
 pinContainer.addEventListener("click", (e) => {
   const svg = (e.target as Element).closest("svg") as SVGElement | null;
   if (!svg) return;
@@ -219,7 +254,7 @@ document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
   const adjLat = st.activePin.dataset.adjLat ?? st.activePin.dataset.lat;
   const adjLng = st.activePin.dataset.adjLng ?? st.activePin.dataset.lng;
   const text = `Lat: ${st.activePin.dataset.lat}\nLon: ${st.activePin.dataset.lng}\nAdjLat: ${adjLat}\nAdjLng: ${adjLng}\nAcc: ±${st.activePin.dataset.acc}m\nX: ${parseFloat(st.activePin.style.left).toFixed(0)}  Y: ${parseFloat(st.activePin.style.top).toFixed(0)}`;
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(text).catch(() => { /* clipboard not available */ });
 });
 
 pinToolbar.querySelector("[data-trash]")?.addEventListener("click", (e) => {

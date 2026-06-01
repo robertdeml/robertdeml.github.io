@@ -1,13 +1,25 @@
+/* ============================================================
+ * gps — Real GPS tracking via Geolocation API.
+ *
+ * Manages watchPosition lifecycle, renders a green GPS pin
+ * + accuracy circle at the transformed pixel location, and
+ * auto-drops footprints when the user moves >20px.
+ * ============================================================ */
+
 import { st, compassBtn, menuBtn, pinContainer, statusEl } from "./state.js";
 import { createPinSvg } from "./pins.js";
 import { gpsToPixel, accToPixelRadius } from "./transform.js";
 import { placeFootprint } from "./pins.js";
 
+/** Removes the green GPS pin and its accuracy circle from the DOM. */
 export function removeGpsPin() {
   if (st.gpsPin) { st.gpsPin.remove(); st.gpsPin = null; }
   if (st.gpsAccCircle) { st.gpsAccCircle.remove(); st.gpsAccCircle = null; }
 }
 
+/** Creates or updates the green GPS pin at the pixel position
+ *  corresponding to (lat,lng). Also draws a dashed accuracy
+ *  circle if `acc` is provided. */
 export function updateGpsPin(lat: number, lng: number, acc?: string) {
   const pos = gpsToPixel(lat, lng);
   if (!pos) return;
@@ -37,6 +49,7 @@ export function updateGpsPin(lat: number, lng: number, acc?: string) {
   }
 }
 
+/** Stops GPS watching, clears state, and removes the GPS pin. */
 function stopTracking() {
   if (st.watchId !== null) {
     navigator.geolocation.clearWatch(st.watchId);
@@ -51,6 +64,9 @@ function stopTracking() {
   statusEl.style.display = "none";
 }
 
+/** Starts GPS watching with high accuracy. On each position
+ *  update, places a green GPS pin, auto-drops footprints
+ *  every 20px of movement, and updates the status bar. */
 function startTracking() {
   menuBtn?.classList.add("active");
   compassBtn?.classList.add("active");
@@ -102,6 +118,7 @@ function startTracking() {
   );
 }
 
+/* --- Compass button wiring --- */
 if (navigator.geolocation && compassBtn) {
   compassBtn.classList.remove("hidden");
   compassBtn.addEventListener("click", () => {

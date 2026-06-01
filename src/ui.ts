@@ -1,3 +1,9 @@
+/* ============================================================
+ * ui — Top-level UI wiring: menu, info dialog, camera, map
+ * mode, body click (pin placement), button disable state,
+ * and clear trail.
+ * ============================================================ */
+
 import { menuBtn, panel, overlay, infoBtn, infoDialog, infoOverlay, infoCloseBtn, cameraBtn, fileInput, compassBtn, mapBtn, st, debugLatInput, debugLonInput, debugAccInput, pinContainer } from "./state.js";
 import { placePin } from "./pins.js";
 import { removeGpsPin } from "./gps.js";
@@ -14,10 +20,12 @@ function toggleInfo(open?: boolean) {
   infoOverlay?.classList.toggle("open", isOpen);
 }
 
+/* --- Menu toggle + overlay dismiss --- */
 menuBtn?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); });
 panel?.addEventListener("click", (e) => e.stopPropagation());
 overlay?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(false); });
 
+/* --- Info dialog open/close --- */
 infoBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
   toggleMenu(false);
@@ -27,8 +35,10 @@ infoDialog?.addEventListener("click", (e) => e.stopPropagation());
 infoCloseBtn?.addEventListener("click", () => toggleInfo(false));
 infoOverlay?.addEventListener("click", () => toggleInfo(false));
 
+/* --- Camera: trigger hidden file input --- */
 cameraBtn?.addEventListener("click", () => fileInput.click());
 
+/* --- On image select: set background, reset GPS state, enable buttons --- */
 fileInput.addEventListener("change", () => {
   const file = fileInput.files?.[0];
   if (!file) return;
@@ -46,6 +56,7 @@ fileInput.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
+/* --- Map Mode toggle: allows pin placement without GPS --- */
 mapBtn?.addEventListener("click", () => {
   st.mapMode = !st.mapMode;
   mapBtn!.classList.toggle("active", st.mapMode);
@@ -56,6 +67,7 @@ mapBtn?.addEventListener("click", () => {
   }
 });
 
+/* Disables GPS and Map buttons until a photo is loaded. */
 function updateButtonsDisabledState() {
   const hasPhoto = !!document.body.style.backgroundImage;
   if (compassBtn) {
@@ -69,6 +81,7 @@ function updateButtonsDisabledState() {
 }
 updateButtonsDisabledState();
 
+/* --- Body click: place a reference pin --- */
 document.body.addEventListener("click", (e: MouseEvent) => {
   if (!document.body.style.backgroundImage) return;
   if (st.watchId === null && !st.debugActive && !st.mapMode) return;
@@ -84,6 +97,7 @@ document.body.addEventListener("click", (e: MouseEvent) => {
   placePin(e.clientX, e.clientY, gps);
 });
 
+/* --- Clear trail: remove all footprints after confirmation --- */
 document.getElementById("clearFpBtn")?.addEventListener("click", () => {
   if (confirm("Clear the trail?\n\nThis will permanently erase every footprint from your map. All tracked footsteps will be removed, but your reference map pins will be kept.\n\nThis cannot be undone. Continue?")) {
     pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach(el => el.remove());
