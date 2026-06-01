@@ -129,7 +129,6 @@ const rotationBtnEl = rotationBtn;
 rotationBtnEl?.addEventListener("click", () => {
   st.rotation = (st.rotation - 90 + 360) % 360;
   applyRotation();
-  rotationBtnEl.classList.toggle("active", st.rotation !== 0);
 });
 
 /* Disables GPS and Map buttons until a photo is loaded. */
