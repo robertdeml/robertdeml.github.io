@@ -4,9 +4,10 @@
  * and clear trail.
  * ============================================================ */
 
-import { menuBtn, panel, overlay, infoBtn, infoDialog, infoOverlay, infoCloseBtn, cameraBtn, fileInput, compassBtn, mapBtn, st, debugLatInput, debugLonInput, debugAccInput, pinContainer } from "./state.js";
+import { menuBtn, panel, overlay, infoBtn, infoDialog, infoOverlay, infoCloseBtn, cameraBtn, fileInput, compassBtn, mapBtn, unitsBtn, st, debugLatInput, debugLonInput, debugAccInput, pinContainer } from "./state.js";
 import { placePin } from "./pins.js";
 import { removeGpsPin } from "./gps.js";
+import { refreshScaleBar } from "./scale.js";
 
 function toggleMenu(open?: boolean) {
   const isOpen = open ?? !panel?.classList.contains("open");
@@ -65,6 +66,14 @@ mapBtn?.addEventListener("click", () => {
   } else {
     menuBtn?.classList.remove("active");
   }
+});
+
+/* --- Units toggle: switch between metric (m/km) and imperial (mi) --- */
+const unitsBtnEl = unitsBtn;
+unitsBtnEl?.addEventListener("click", () => {
+  st.unit = st.unit === "metric" ? "imperial" : "metric";
+  unitsBtnEl.classList.toggle("active", st.unit === "imperial");
+  refreshScaleBar();
 });
 
 /* Disables GPS and Map buttons until a photo is loaded. */

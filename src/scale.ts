@@ -8,26 +8,28 @@
  * ============================================================ */
 
 import { getTransformCoeffs, getMetersPerDeg } from "./transform.js";
+import { st } from "./state.js";
 
 const SCALE_BAR_ID = "mapScaleBar";
 
-/** Rounds a target distance (in meters) to the nearest "nice"
- *  scale value: 1, 2, or 5 times a power of 10.
- *  Returns the rounded value and the appropriate unit (m or km). */
-function getNiceScale(targetMeters: number): { value: number; unit: string } {
-  if (targetMeters <= 0) return { value: 1, unit: "m" };
-  const pow10 = Math.pow(10, Math.floor(Math.log10(targetMeters)));
-  const firstDigit = targetMeters / pow10;
-  let niceValue: number;
-  if (firstDigit < 1.5) niceValue = 1;
-  else if (firstDigit < 3.5) niceValue = 2;
-  else if (firstDigit < 7.5) niceValue = 5;
-  else niceValue = 10;
-  niceValue *= pow10;
-  if (niceValue >= 1000) {
-    return { value: niceValue / 1000, unit: "km" };
-  }
-  return { value: niceValue, unit: "m" };
+/** Rounds a positive target value to the nearest "nice" number:
+ *  1, 2, or 5 times a power of 10. */
+function getNiceScale(target: number): number {
+  if (target <= 0) return 1;
+  const pow10 = Math.pow(10, Math.floor(Math.log10(target)));
+  const firstDigit = target / pow10;
+  let nice: number;
+  if (firstDigit < 1.5) nice = 1;
+  else if (firstDigit < 3.5) nice = 2;
+  else if (firstDigit < 7.5) nice = 5;
+  else nice = 10;
+  return nice * pow10;
+}
+
+/** Formats a nice scale value for display, stripping unnecessary
+ *  trailing zeros (e.g. "1", "0.5", "2.5"). */
+function formatScaleValue(v: number): string {
+  return v % 1 === 0 ? v.toString() : parseFloat(v.toFixed(4)).toString();
 }
 
 /** Creates or updates the scale bar element. Hides it when the
@@ -47,8 +49,25 @@ export function refreshScaleBar(): void {
   const targetPx = window.innerWidth / 3;
   const targetMeters = targetPx * mPerDegLat / s;
 
-  const nice = getNiceScale(targetMeters);
-  const niceMeters = nice.unit === "km" ? nice.value * 1000 : nice.value;
+  let niceMeters: number;
+  let label: string;
+
+  if (st.unit === "imperial") {
+    const M_PER_MI = 1609.344;
+    const targetMiles = targetMeters / M_PER_MI;
+    const niceMiles = getNiceScale(targetMiles);
+    niceMeters = niceMiles * M_PER_MI;
+    label = `${formatScaleValue(niceMiles)} mi`;
+  } else {
+    const nice = getNiceScale(targetMeters);
+    niceMeters = nice;
+    if (nice >= 1000) {
+      label = `${formatScaleValue(nice / 1000)} km`;
+    } else {
+      label = `${formatScaleValue(nice)} m`;
+    }
+  }
+
   const actualPx = niceMeters * s / mPerDegLat;
 
   if (!el) {
@@ -75,7 +94,7 @@ export function refreshScaleBar(): void {
     "line-height:1",
   ].join(";") + ";";
 
-  el.innerHTML = `<div style="border-top:2px solid #FF5A00;width:${actualPx}px;margin:0 2px;"></div><span>${nice.value} ${nice.unit}</span>`;
+  el.innerHTML = `<div style="border-top:2px solid #FF5A00;width:${actualPx}px;margin:0 2px;"></div><span>${label}</span>`;
 }
 
 /* --- Refresh on viewport resize (debounced via rAF) --- */

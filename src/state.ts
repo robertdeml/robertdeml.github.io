@@ -24,6 +24,7 @@ export const cameraBtn = document.querySelector('button:has([data-lucide="camera
 export const fileInput = document.getElementById("cameraInput") as HTMLInputElement;
 
 export const mapBtn = document.getElementById("mapBtn");
+export const unitsBtn = document.getElementById("unitsBtn");
 
 export const pinToolbar = document.getElementById("pinToolbar") as HTMLDivElement;
 export const pinOverlay = document.getElementById("pinOverlay") as HTMLDivElement;
@@ -44,6 +45,7 @@ export const st = {
   debugActive: false as boolean,
   debugInterval: null as ReturnType<typeof setInterval> | null,
   mapMode: false as boolean,
+  unit: "metric" as "metric" | "imperial",
   activePin: null as SVGElement | null,
 };
 
