@@ -1,0 +1,75 @@
+import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, statusEl, isLocal } from "./state.js";
+import { gpsToPixel } from "./transform.js";
+import { placeFootprint } from "./pins.js";
+import { updateGpsPin, removeGpsPin } from "./gps.js";
+
+if (!isLocal) {
+  testBtn?.classList.add("hidden");
+  debugPanel?.classList.add("hidden");
+}
+
+function updateDebugGps() {
+  const lat = parseFloat(debugLatInput.value);
+  const lng = parseFloat(debugLonInput.value);
+  if (isNaN(lat) || isNaN(lng)) return;
+  if (st.lastFpLat !== null && st.lastFpLng !== null) {
+    const fpPos = gpsToPixel(st.lastFpLat, st.lastFpLng);
+    if (fpPos) {
+      const curPos = gpsToPixel(lat, lng);
+      if (curPos) {
+        const dx = curPos.x - fpPos.x;
+        const dy = curPos.y - fpPos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 20) {
+          placeFootprint(lat, lng);
+          st.lastFpLat = lat;
+          st.lastFpLng = lng;
+        }
+      }
+    }
+  } else {
+    st.lastFpLat = lat;
+    st.lastFpLng = lng;
+  }
+  const acc = parseFloat(debugAccInput.value) || 10;
+  updateGpsPin(lat, lng, acc.toFixed(0));
+  statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m`;
+  const gp = st.gpsPin;
+  if (gp) {
+    statusEl.textContent += `  (${parseFloat(gp.style.left).toFixed(0)}, ${parseFloat(gp.style.top).toFixed(0)})`;
+  }
+}
+
+if (testBtn && isLocal) {
+  testBtn.addEventListener("click", () => {
+    st.debugActive = !st.debugActive;
+    testBtn!.classList.toggle("active", st.debugActive);
+    debugPanel.classList.toggle("hidden", !st.debugActive);
+    if (st.debugActive) {
+      updateDebugGps();
+      st.debugInterval = setInterval(updateDebugGps, 1000);
+    } else {
+      if (st.debugInterval) { clearInterval(st.debugInterval); st.debugInterval = null; }
+      if (st.watchId !== null && st.lastGps) {
+        const lat = parseFloat(st.lastGps.lat);
+        const lng = parseFloat(st.lastGps.lng);
+        updateGpsPin(lat, lng, st.lastGps.acc);
+        statusEl.textContent = `${st.lastGps.lat}, ${st.lastGps.lng}  ±${st.lastGps.acc}m`;
+        const gp2 = st.gpsPin;
+        if (gp2) {
+          statusEl.textContent += `  (${parseFloat(gp2.style.left).toFixed(0)}, ${parseFloat(gp2.style.top).toFixed(0)})`;
+        }
+      } else {
+        removeGpsPin();
+        statusEl.style.display = "none";
+      }
+    }
+  });
+}
+
+if (isLocal) {
+  debugPanel.addEventListener("click", (e) => e.stopPropagation());
+  debugLatInput.addEventListener("input", updateDebugGps);
+  debugLonInput.addEventListener("input", updateDebugGps);
+  debugAccInput.addEventListener("input", updateDebugGps);
+}
