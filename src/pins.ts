@@ -10,6 +10,7 @@
 
 import { st, pinContainer, pinToolbar, pinOverlay, pinGpsInfo, gpsAdjRow, pinAdjLatEl, pinAdjLngEl, FUI } from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
+import { refreshScaleBar } from "./scale.js";
 
 /** Creates an SVG location-pin element at (x,y).
  *  If `gps` is provided, stores lat/lng/acc as data attributes.
@@ -145,6 +146,7 @@ function refreshAccuracyCircles() {
       hideAccuracyCircle(pin);
     }
   });
+  refreshScaleBar();
 }
 
 /** Adjusts a pin's GPS coords within its accuracy bounds (clamped),

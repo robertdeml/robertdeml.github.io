@@ -8,6 +8,7 @@ const ASSETS = [
   "pins.js",
   "gps.js",
   "debug.js",
+  "scale.js",
   "ui.js",
   "lucide.js",
   "floating-ui.core.umd.js",
