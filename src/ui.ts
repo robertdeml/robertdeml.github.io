@@ -17,11 +17,13 @@ import {
   compassBtn,
   mapBtn,
   unitsBtn,
+  rotationBtn,
   st,
   debugLatInput,
   debugLonInput,
   debugAccInput,
   pinContainer,
+  mapBg,
 } from "./state.js";
 import { placePin } from "./pins.js";
 import { removeGpsPin } from "./gps.js";
@@ -72,11 +74,9 @@ fileInput.addEventListener("change", () => {
     removeGpsPin();
     st.lastFpLat = null;
     st.lastFpLng = null;
-    document.body.style.backgroundImage = `url(${reader.result})`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundRepeat = "no-repeat";
-    updateButtonsDisabledState();
+    st.rotation = 0;
+    st.originalImage = reader.result as string;
+    applyRotation();
   };
   reader.readAsDataURL(file);
 });
@@ -100,23 +100,53 @@ unitsBtnEl?.addEventListener("click", () => {
   refreshScaleBar();
 });
 
+/* --- Image rotation: 90° counter-clockwise via canvas --- */
+function applyRotation() {
+  if (!st.originalImage) return;
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    if (st.rotation === 90 || st.rotation === 270) {
+      canvas.width = h;
+      canvas.height = w;
+    } else {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    const ctx = canvas.getContext("2d")!;
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((st.rotation * Math.PI) / 180);
+    ctx.drawImage(img, -w / 2, -h / 2);
+    mapBg.style.backgroundImage = `url(${canvas.toDataURL("image/jpeg", 0.92)})`;
+    updateButtonsDisabledState();
+  };
+  img.src = st.originalImage;
+}
+
+const rotationBtnEl = rotationBtn;
+rotationBtnEl?.addEventListener("click", () => {
+  st.rotation = (st.rotation - 90 + 360) % 360;
+  applyRotation();
+  rotationBtnEl.classList.toggle("active", st.rotation !== 0);
+});
+
 /* Disables GPS and Map buttons until a photo is loaded. */
 function updateButtonsDisabledState() {
-  const hasPhoto = !!document.body.style.backgroundImage;
-  if (compassBtn) {
-    if (hasPhoto) compassBtn.removeAttribute("disabled");
-    else compassBtn.setAttribute("disabled", "");
-  }
-  if (mapBtn) {
-    if (hasPhoto) mapBtn.removeAttribute("disabled");
-    else mapBtn.setAttribute("disabled", "");
+  const hasPhoto = !!mapBg.style.backgroundImage;
+  for (const btn of [compassBtn, mapBtn, rotationBtn]) {
+    if (btn) {
+      if (hasPhoto) btn.removeAttribute("disabled");
+      else btn.setAttribute("disabled", "");
+    }
   }
 }
 updateButtonsDisabledState();
 
 /* --- Body click: place a reference pin --- */
 document.body.addEventListener("click", (e: MouseEvent) => {
-  if (!document.body.style.backgroundImage) return;
+  if (!mapBg.style.backgroundImage) return;
   if (st.watchId === null && !st.debugActive && !st.mapMode) return;
   let gps = st.lastGps ?? undefined;
   if (st.debugActive) {

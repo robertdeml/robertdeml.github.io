@@ -25,6 +25,7 @@ export const fileInput = document.getElementById("cameraInput") as HTMLInputElem
 
 export const mapBtn = document.getElementById("mapBtn");
 export const unitsBtn = document.getElementById("unitsBtn");
+export const rotationBtn = document.getElementById("rotationBtn");
 
 export const pinToolbar = document.getElementById("pinToolbar") as HTMLDivElement;
 export const pinOverlay = document.getElementById("pinOverlay") as HTMLDivElement;
@@ -46,10 +47,17 @@ export const st = {
   debugInterval: null as ReturnType<typeof setInterval> | null,
   mapMode: false as boolean,
   unit: "metric" as "metric" | "imperial",
+  rotation: 0,
+  originalImage: null as string | null,
   activePin: null as SVGElement | null,
 };
 
 export const FUI = (window as any).FloatingUIDOM;
+
+export const mapBg = document.createElement("div");
+mapBg.id = "mapBg";
+mapBg.style.cssText = "position:fixed;inset:0;z-index:1;overflow:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;";
+document.body.appendChild(mapBg);
 
 export const pinContainer = document.createElement("div");
 pinContainer.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;";

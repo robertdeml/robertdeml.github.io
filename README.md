@@ -39,11 +39,5 @@ Rebuilds on file changes.
 
 # TODOs
 
-- ~add GPS tracking.~
-- ~add location markers~
-- ~able to remove location markers~
-- ~able to adjust left/right/up/down markers~
-- ~able to save footprints of where we were~
-- ~able to space footprints to a reasonsable spacing~
 - able to scale image to fit the screen
 - able to zoom in and out and show paths
