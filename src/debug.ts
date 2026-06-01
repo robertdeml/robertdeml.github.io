@@ -62,7 +62,10 @@ if (testBtn && isLocal) {
       updateDebugGps();
       st.debugInterval = setInterval(updateDebugGps, 1000);
     } else {
-      if (st.debugInterval) { clearInterval(st.debugInterval); st.debugInterval = null; }
+      if (st.debugInterval) {
+        clearInterval(st.debugInterval);
+        st.debugInterval = null;
+      }
       if (st.watchId !== null && st.lastGps) {
         const lat = parseFloat(st.lastGps.lat);
         const lng = parseFloat(st.lastGps.lng);

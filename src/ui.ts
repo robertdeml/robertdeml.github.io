@@ -4,7 +4,25 @@
  * and clear trail.
  * ============================================================ */
 
-import { menuBtn, panel, overlay, infoBtn, infoDialog, infoOverlay, infoCloseBtn, cameraBtn, fileInput, compassBtn, mapBtn, unitsBtn, st, debugLatInput, debugLonInput, debugAccInput, pinContainer } from "./state.js";
+import {
+  menuBtn,
+  panel,
+  overlay,
+  infoBtn,
+  infoDialog,
+  infoOverlay,
+  infoCloseBtn,
+  cameraBtn,
+  fileInput,
+  compassBtn,
+  mapBtn,
+  unitsBtn,
+  st,
+  debugLatInput,
+  debugLonInput,
+  debugAccInput,
+  pinContainer,
+} from "./state.js";
 import { placePin } from "./pins.js";
 import { removeGpsPin } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
@@ -22,9 +40,15 @@ function toggleInfo(open?: boolean) {
 }
 
 /* --- Menu toggle + overlay dismiss --- */
-menuBtn?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); });
+menuBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleMenu();
+});
 panel?.addEventListener("click", (e) => e.stopPropagation());
-overlay?.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(false); });
+overlay?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleMenu(false);
+});
 
 /* --- Info dialog open/close --- */
 infoBtn?.addEventListener("click", (e) => {
@@ -108,8 +132,12 @@ document.body.addEventListener("click", (e: MouseEvent) => {
 
 /* --- Clear trail: remove all footprints after confirmation --- */
 document.getElementById("clearFpBtn")?.addEventListener("click", () => {
-  if (confirm("Clear the trail?\n\nThis will permanently erase every footprint from your map. All tracked footsteps will be removed, but your reference map pins will be kept.\n\nThis cannot be undone. Continue?")) {
-    pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach(el => el.remove());
+  if (
+    confirm(
+      "Clear the trail?\n\nThis will permanently erase every footprint from your map. All tracked footsteps will be removed, but your reference map pins will be kept.\n\nThis cannot be undone. Continue?",
+    )
+  ) {
+    pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach((el) => el.remove());
     st.lastFpLat = null;
     st.lastFpLng = null;
   }

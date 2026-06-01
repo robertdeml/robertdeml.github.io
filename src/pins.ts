@@ -8,14 +8,30 @@
  * 1-meter adjustments, copy, and delete.
  * ============================================================ */
 
-import { st, pinContainer, pinToolbar, pinOverlay, pinGpsInfo, gpsAdjRow, pinAdjLatEl, pinAdjLngEl, FUI } from "./state.js";
+import {
+  st,
+  pinContainer,
+  pinToolbar,
+  pinOverlay,
+  pinGpsInfo,
+  gpsAdjRow,
+  pinAdjLatEl,
+  pinAdjLngEl,
+  FUI,
+} from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { refreshScaleBar } from "./scale.js";
 
 /** Creates an SVG location-pin element at (x,y).
  *  If `gps` is provided, stores lat/lng/acc as data attributes.
  *  `clickable` controls pointer-events and cursor. */
-export function createPinSvg(x: number, y: number, color: string, clickable: boolean, gps?: { lat: string; lng: string; acc: string }) {
+export function createPinSvg(
+  x: number,
+  y: number,
+  color: string,
+  clickable: boolean,
+  gps?: { lat: string; lng: string; acc: string },
+) {
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
@@ -37,7 +53,10 @@ export function createPinSvg(x: number, y: number, color: string, clickable: boo
   svg.style.top = `${y}px`;
   svg.style.transform = "translate(-50%, -100%)";
   const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0");
+  path.setAttribute(
+    "d",
+    "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
+  );
   svg.appendChild(path);
   const circle = document.createElementNS(ns, "circle");
   circle.setAttribute("cx", "12");
@@ -82,10 +101,16 @@ export function placeFootprint(gpsLat: number, gpsLng: number) {
   svg.style.top = `${pos.y}px`;
   svg.style.transform = "translate(-50%, -100%)";
   const p1 = document.createElementNS(ns, "path");
-  p1.setAttribute("d", "M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z");
+  p1.setAttribute(
+    "d",
+    "M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z",
+  );
   svg.appendChild(p1);
   const p2 = document.createElementNS(ns, "path");
-  p2.setAttribute("d", "M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z");
+  p2.setAttribute(
+    "d",
+    "M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z",
+  );
   svg.appendChild(p2);
   const p3 = document.createElementNS(ns, "path");
   p3.setAttribute("d", "M16 17h4");
@@ -128,9 +153,12 @@ function showAccuracyCircle(pin: SVGElement) {
 function hideAccuracyCircle(pin?: SVGElement) {
   if (pin) {
     const svg = (pin as any)._accCircle;
-    if (svg) { svg.remove(); delete (pin as any)._accCircle; }
+    if (svg) {
+      svg.remove();
+      delete (pin as any)._accCircle;
+    }
   } else {
-    pinContainer.querySelectorAll("svg[data-lat]").forEach(p => hideAccuracyCircle(p as SVGElement));
+    pinContainer.querySelectorAll("svg[data-lat]").forEach((p) => hideAccuracyCircle(p as SVGElement));
   }
 }
 
@@ -138,7 +166,7 @@ function hideAccuracyCircle(pin?: SVGElement) {
  *  circles depending on whether the affine transform is ready. */
 function refreshAccuracyCircles() {
   const hasTransform = getTransformCoeffs() !== null;
-  pinContainer.querySelectorAll("svg[data-lat]").forEach(p => {
+  pinContainer.querySelectorAll("svg[data-lat]").forEach((p) => {
     const pin = p as SVGElement;
     if (hasTransform) {
       showAccuracyCircle(pin);
@@ -230,7 +258,10 @@ pinContainer.addEventListener("click", (e) => {
   const svg = (e.target as Element).closest("svg") as SVGElement | null;
   if (!svg) return;
   e.stopPropagation();
-  if (st.activePin === svg) { hideToolbar(); return; }
+  if (st.activePin === svg) {
+    hideToolbar();
+    return;
+  }
   showToolbar(svg);
 });
 
@@ -256,7 +287,9 @@ document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
   const adjLat = st.activePin.dataset.adjLat ?? st.activePin.dataset.lat;
   const adjLng = st.activePin.dataset.adjLng ?? st.activePin.dataset.lng;
   const text = `Lat: ${st.activePin.dataset.lat}\nLon: ${st.activePin.dataset.lng}\nAdjLat: ${adjLat}\nAdjLng: ${adjLng}\nAcc: ±${st.activePin.dataset.acc}m\nX: ${parseFloat(st.activePin.style.left).toFixed(0)}  Y: ${parseFloat(st.activePin.style.top).toFixed(0)}`;
-  navigator.clipboard.writeText(text).catch(() => { /* clipboard not available */ });
+  navigator.clipboard.writeText(text).catch(() => {
+    /* clipboard not available */
+  });
 });
 
 pinToolbar.querySelector("[data-trash]")?.addEventListener("click", (e) => {
@@ -273,7 +306,7 @@ pinOverlay.addEventListener("click", (e) => {
   hideToolbar();
 });
 
-gpsAdjRow?.querySelectorAll("[data-gps-adj]").forEach(btn => {
+gpsAdjRow?.querySelectorAll("[data-gps-adj]").forEach((btn) => {
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     if (!st.activePin || !st.activePin.dataset.lat) return;
@@ -284,10 +317,18 @@ gpsAdjRow?.querySelectorAll("[data-gps-adj]").forEach(btn => {
     let adjLat = parseFloat(st.activePin.dataset.adjLat ?? st.activePin.dataset.lat!);
     let adjLng = parseFloat(st.activePin.dataset.adjLng ?? st.activePin.dataset.lng!);
     switch (dir) {
-      case "lat+": adjLat += step / mPerDegLat; break;
-      case "lat-": adjLat -= step / mPerDegLat; break;
-      case "lng+": adjLng += step / mPerDegLng; break;
-      case "lng-": adjLng -= step / mPerDegLng; break;
+      case "lat+":
+        adjLat += step / mPerDegLat;
+        break;
+      case "lat-":
+        adjLat -= step / mPerDegLat;
+        break;
+      case "lng+":
+        adjLng += step / mPerDegLng;
+        break;
+      case "lng-":
+        adjLng -= step / mPerDegLng;
+        break;
     }
     clampAndApplyGps(st.activePin, adjLat, adjLng);
   });

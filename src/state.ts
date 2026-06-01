@@ -3,7 +3,7 @@
  * All other modules import from here to read/write state.
  * ============================================================ */
 
-export const menuBtn = document.querySelector('.menu-btn button');
+export const menuBtn = document.querySelector(".menu-btn button");
 export const panel = document.getElementById("buttonsPanel");
 export const overlay = document.getElementById("menuOverlay");
 
@@ -57,5 +57,6 @@ document.body.appendChild(pinContainer);
 
 export const statusEl = document.createElement("div");
 statusEl.id = "gpsStatus";
-statusEl.style.cssText = "position:fixed;bottom:8px;left:8px;color:#FF5A00;font-family:monospace;font-size:14px;z-index:10;background:rgba(0,0,0,0.6);padding:4px 8px;border-radius:4px;display:none;";
+statusEl.style.cssText =
+  "position:fixed;bottom:8px;left:8px;color:#FF5A00;font-family:monospace;font-size:14px;z-index:10;background:rgba(0,0,0,0.6);padding:4px 8px;border-radius:4px;display:none;";
 document.body.appendChild(statusEl);

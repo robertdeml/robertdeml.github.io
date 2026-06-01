@@ -33,7 +33,9 @@ export function getTransformCoeffs() {
   const refs = getRefPins();
   if (refs.length < 2) return null;
   const [p0] = refs;
-  let sumA = 0, sumB = 0, sumW = 0;
+  let sumA = 0,
+    sumB = 0,
+    sumW = 0;
   for (let i = 1; i < refs.length; i++) {
     const p = refs[i];
     const dLat = p.lat - p0.lat;
@@ -70,7 +72,7 @@ export function accToPixelRadius(accMeters: number): number {
   const coeffs = getTransformCoeffs();
   if (!coeffs) return 10;
   const { a, b } = coeffs;
-  const radius = Math.sqrt(a * a + b * b) * accMeters / 111320;
+  const radius = (Math.sqrt(a * a + b * b) * accMeters) / 111320;
   return Math.min(radius, MAX_ACC_RADIUS_PX);
 }
 
@@ -78,6 +80,6 @@ export function accToPixelRadius(accMeters: number): number {
  *  a given latitude. Used for 1-meter GPS nudge calculations. */
 export function getMetersPerDeg(lat: number) {
   const mPerDegLat = 111320;
-  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
+  const mPerDegLng = 111320 * Math.cos((lat * Math.PI) / 180);
   return { mPerDegLat, mPerDegLng };
 }

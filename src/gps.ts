@@ -13,8 +13,14 @@ import { placeFootprint } from "./pins.js";
 
 /** Removes the green GPS pin and its accuracy circle from the DOM. */
 export function removeGpsPin() {
-  if (st.gpsPin) { st.gpsPin.remove(); st.gpsPin = null; }
-  if (st.gpsAccCircle) { st.gpsAccCircle.remove(); st.gpsAccCircle = null; }
+  if (st.gpsPin) {
+    st.gpsPin.remove();
+    st.gpsPin = null;
+  }
+  if (st.gpsAccCircle) {
+    st.gpsAccCircle.remove();
+    st.gpsAccCircle = null;
+  }
 }
 
 /** Creates or updates the green GPS pin at the pixel position
@@ -114,7 +120,7 @@ function startTracking() {
         statusEl.textContent = `GPS error: ${err.message}`;
       }
     },
-    { enableHighAccuracy: true }
+    { enableHighAccuracy: true },
   );
 }
 

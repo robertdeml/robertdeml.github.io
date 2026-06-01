@@ -1,140 +1,366 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HikeNow</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FF5A00">
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; min-height: 100vh; }
-    .menu-btn { position: fixed; top: 1rem; right: 1rem; z-index: 10; }
-    .menu-btn button { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; }
-    .menu-btn button:hover { background: #e9e9e9; }
-    .menu-overlay { display: none; position: fixed; inset: 0; z-index: 9; }
-    .menu-overlay.open { display: block; }
-    .buttons-panel { display: none; position: fixed; top: 4rem; right: 1rem; z-index: 10; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .buttons-panel.open { display: flex; flex-wrap: wrap; gap: 8px; }
-    button { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; }
-    button:hover { background: #e9e9e9; }
-    .hidden { display: none; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button:disabled:hover { background: #f9f9f9; }
-    .pin-toolbar { position: fixed; z-index: 20; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .pin-toolbar .row { display: flex; gap: 2px; }
-    .pin-toolbar button { width: 32px; height: 32px; }
-    #copyGpsBtn { width: 28px; height: 28px; align-self: center; margin-right: 2px; flex-shrink: 0; }
-    .pin-toolbar [data-trash] { color: #d32f2f; }
-    .pin-arrows { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .pin-gps-info { font-family: monospace; font-size: 11px; color: #555; padding: 4px 8px; display: none; flex-direction: column; justify-content: center; white-space: nowrap; }
-    .pin-overlay { position: fixed; inset: 0; z-index: 15; }
-    .active { color: #FF5A00; }
-    .debug-panel { position: fixed; top: 4rem; right: 1rem; z-index: 8; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 13px; }
-    .debug-panel label { display: block; margin: 2px 0; }
-    .debug-panel input { width: 120px; font-family: monospace; font-size: 13px; }
-    .icon-stack { position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
-    .icon-stack .overlay { position: absolute; opacity: 0.85; }
-    .info-overlay { display: none; position: fixed; inset: 0; z-index: 25; background: rgba(0,0,0,0.4); }
-    .info-overlay.open { display: block; }
-    .info-dialog { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30; background: #fff; border-radius: 12px; padding: 24px; max-width: 420px; width: 85%; box-shadow: 0 4px 24px rgba(0,0,0,0.25); font-family: sans-serif; }
-    .info-dialog.open { display: block; }
-    .info-dialog h2 { margin: 0 0 16px; font-size: 18px; color: #FF5A00; text-align: center; }
-    .info-dialog .info-content { font-size: 13px; line-height: 1.6; color: #333; }
-    .info-dialog .info-content p { margin: 8px 0; }
-    .info-dialog .info-content strong { color: #111; }
-    #infoCloseBtn { display: block; margin: 20px auto 0; padding: 8px 24px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; color: #333; width: auto; height: auto; }
-    #infoCloseBtn:hover { background: #e9e9e9; }
-  </style>
-</head>
-<body>
-  <h1>Welcome to HikeNow</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HikeNow</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FF5A00" />
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+      .menu-btn {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+      }
+      .menu-btn button {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #f9f9f9;
+      }
+      .menu-btn button:hover {
+        background: #e9e9e9;
+      }
+      .menu-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+      .buttons-panel {
+        display: none;
+        position: fixed;
+        top: 4rem;
+        right: 1rem;
+        z-index: 10;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .buttons-panel.open {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      button {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #f9f9f9;
+      }
+      button:hover {
+        background: #e9e9e9;
+      }
+      .hidden {
+        display: none;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      button:disabled:hover {
+        background: #f9f9f9;
+      }
+      .pin-toolbar {
+        position: fixed;
+        z-index: 20;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .pin-toolbar .row {
+        display: flex;
+        gap: 2px;
+      }
+      .pin-toolbar button {
+        width: 32px;
+        height: 32px;
+      }
+      #copyGpsBtn {
+        width: 28px;
+        height: 28px;
+        align-self: center;
+        margin-right: 2px;
+        flex-shrink: 0;
+      }
+      .pin-toolbar [data-trash] {
+        color: #d32f2f;
+      }
+      .pin-arrows {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .pin-gps-info {
+        font-family: monospace;
+        font-size: 11px;
+        color: #555;
+        padding: 4px 8px;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        white-space: nowrap;
+      }
+      .pin-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 15;
+      }
+      .active {
+        color: #ff5a00;
+      }
+      .debug-panel {
+        position: fixed;
+        top: 4rem;
+        right: 1rem;
+        z-index: 8;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-size: 13px;
+      }
+      .debug-panel label {
+        display: block;
+        margin: 2px 0;
+      }
+      .debug-panel input {
+        width: 120px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+      .icon-stack {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+      }
+      .icon-stack .overlay {
+        position: absolute;
+        opacity: 0.85;
+      }
+      .info-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 25;
+        background: rgba(0, 0, 0, 0.4);
+      }
+      .info-overlay.open {
+        display: block;
+      }
+      .info-dialog {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 30;
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 420px;
+        width: 85%;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+        font-family: sans-serif;
+      }
+      .info-dialog.open {
+        display: block;
+      }
+      .info-dialog h2 {
+        margin: 0 0 16px;
+        font-size: 18px;
+        color: #ff5a00;
+        text-align: center;
+      }
+      .info-dialog .info-content {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #333;
+      }
+      .info-dialog .info-content p {
+        margin: 8px 0;
+      }
+      .info-dialog .info-content strong {
+        color: #111;
+      }
+      #infoCloseBtn {
+        display: block;
+        margin: 20px auto 0;
+        padding: 8px 24px;
+        font-size: 14px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #f9f9f9;
+        color: #333;
+        width: auto;
+        height: auto;
+      }
+      #infoCloseBtn:hover {
+        background: #e9e9e9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to HikeNow</h1>
 
-  <div class="menu-btn">
-    <button><span data-lucide="menu"></span></button>
-  </div>
-
-  <div class="menu-overlay" id="menuOverlay"></div>
-
-  <div id="debugPanel" class="debug-panel hidden">
-    <label>Lat: <input type="number" id="debugLat" step="0.01" value="42.9"></label>
-    <label>Lon: <input type="number" id="debugLon" step="0.01" value="-71.5"></label>
-    <label>Acc: <input type="number" id="debugAcc" step="1" value="20" style="width:60px"> m</label>
-  </div>
-
-  <div class="buttons-panel" id="buttonsPanel">
-    <button class="hidden"><span data-lucide="lock"></span></button>
-    <button class="hidden"><span data-lucide="unlock"></span></button>
-    <button class="hidden"><span data-lucide="chevron-up"></span></button>
-    <button class="hidden"><span data-lucide="chevron-down"></span></button>
-    <button class="hidden"><span data-lucide="chevron-left"></span></button>
-    <button class="hidden"><span data-lucide="chevron-right"></span></button>
-    <button><span data-lucide="camera"></span></button>
-    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none">
-    <button id="compassBtn" class="hidden"><span data-lucide="satellite"></span></button>
-    <button id="mapBtn"><span data-lucide="map"></span></button>
-    <button id="unitsBtn"><span data-lucide="ruler"></span></button>
-    <button class="hidden"><span data-lucide="map-pin"></span></button>
-    <button id="infoBtn"><span data-lucide="info"></span></button>
-    <button id="clearFpBtn">
-      <div class="icon-stack">
-        <span data-lucide="footprints" width="16" height="16"></span>
-        <span data-lucide="ban" class="overlay"></span>
-      </div>
-    </button>
-    <button id="testBtn"><span data-lucide="bug"></span></button>
-  </div>
-
-  <div id="infoOverlay" class="info-overlay"></div>
-  <div id="infoDialog" class="info-dialog">
-    <h2>How to Use HikeNow</h2>
-    <div class="info-content">
-      <p><strong>📷 Camera</strong> — Overlay a photo as the map background. Tap anywhere to place a pin.</p>
-      <p><strong>🛰️ GPS</strong> — Track your position in real time. Footprints are left automatically along your path.</p>
-      <p><strong>🐛 Debug</strong> — Manually enter GPS coordinates for testing without a live signal.</p>
-      <p><strong>🗺️ Map Mode</strong> — Enables pin placement anywhere, even without GPS or a photo.</p>
-      <p><strong>📍 Pins</strong> — Click a placed pin to show its toolbar. Use arrow keys to nudge or N/S/E/W to adjust by 1 meter. Copy coordinates or delete the pin.</p>
-      <p><strong>👣 Clear Trail</strong> — Erase all footprints while keeping your reference pins.</p>
-      <p><strong>💡 Tip</strong> — Place at least two reference pins on features you recognize (trail junctions, landmarks) to enable GPS-to-pixel mapping and automatic footprint tracking.</p>
+    <div class="menu-btn">
+      <button><span data-lucide="menu"></span></button>
     </div>
-    <button id="infoCloseBtn">Close</button>
-  </div>
 
-  <div id="pinOverlay" class="pin-overlay" style="display:none"></div>
+    <div class="menu-overlay" id="menuOverlay"></div>
 
-  <div id="pinToolbar" class="pin-toolbar" style="display:none">
-    <div class="row" style="align-items:stretch">
-      <div class="pin-arrows">
-        <button data-dir="up"><span data-lucide="chevron-up"></span></button>
-        <div class="row">
-          <button data-dir="left"><span data-lucide="chevron-left"></span></button>
-          <button data-dir="right"><span data-lucide="chevron-right"></span></button>
+    <div id="debugPanel" class="debug-panel hidden">
+      <label>Lat: <input type="number" id="debugLat" step="0.01" value="42.9" /></label>
+      <label>Lon: <input type="number" id="debugLon" step="0.01" value="-71.5" /></label>
+      <label>Acc: <input type="number" id="debugAcc" step="1" value="20" style="width: 60px" /> m</label>
+    </div>
+
+    <div class="buttons-panel" id="buttonsPanel">
+      <button class="hidden"><span data-lucide="lock"></span></button>
+      <button class="hidden"><span data-lucide="unlock"></span></button>
+      <button class="hidden"><span data-lucide="chevron-up"></span></button>
+      <button class="hidden"><span data-lucide="chevron-down"></span></button>
+      <button class="hidden"><span data-lucide="chevron-left"></span></button>
+      <button class="hidden"><span data-lucide="chevron-right"></span></button>
+      <button><span data-lucide="camera"></span></button>
+      <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none" />
+      <button id="compassBtn" class="hidden"><span data-lucide="satellite"></span></button>
+      <button id="mapBtn"><span data-lucide="map"></span></button>
+      <button id="unitsBtn"><span data-lucide="ruler"></span></button>
+      <button class="hidden"><span data-lucide="map-pin"></span></button>
+      <button id="infoBtn"><span data-lucide="info"></span></button>
+      <button id="clearFpBtn">
+        <div class="icon-stack">
+          <span data-lucide="footprints" width="16" height="16"></span>
+          <span data-lucide="ban" class="overlay"></span>
         </div>
-        <button data-dir="down"><span data-lucide="chevron-down"></span></button>
-      </div>
-      <div id="pinGpsInfo" class="pin-gps-info"></div>
-      <button id="copyGpsBtn" title="Copy to clipboard"><span data-lucide="clipboard-copy"></span></button>
+      </button>
+      <button id="testBtn"><span data-lucide="bug"></span></button>
     </div>
-    <div id="gpsAdjRow" class="row" style="display:none;align-items:center;gap:4px;padding:2px 4px;font-family:monospace;font-size:11px">
-      <button data-gps-adj="lat+" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lat +1m">N</button>
-      <span id="pinAdjLat" style="min-width:70px;text-align:center">0.000000</span>
-      <button data-gps-adj="lat-" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lat -1m">S</button>
-      <span style="color:#ccc">│</span>
-      <button data-gps-adj="lng+" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lng +1m">E</button>
-      <span id="pinAdjLng" style="min-width:70px;text-align:center">0.000000</span>
-      <button data-gps-adj="lng-" style="width:24px;height:24px;font-size:12px;font-weight:bold" title="Lng -1m">W</button>
-    </div>
-    <button data-trash><span data-lucide="trash-2"></span></button>
-  </div>
 
-  <script src="lucide.js"></script>
-  <script src="floating-ui.core.umd.js"></script>
-  <script src="floating-ui.dom.umd.js"></script>
-  <script>lucide.createIcons({ size: 32 });</script>
-  <script type="module" src="app.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
-</body>
+    <div id="infoOverlay" class="info-overlay"></div>
+    <div id="infoDialog" class="info-dialog">
+      <h2>How to Use HikeNow</h2>
+      <div class="info-content">
+        <p><strong>📷 Camera</strong> — Overlay a photo as the map background. Tap anywhere to place a pin.</p>
+        <p>
+          <strong>🛰️ GPS</strong> — Track your position in real time. Footprints are left automatically along your path.
+        </p>
+        <p><strong>🐛 Debug</strong> — Manually enter GPS coordinates for testing without a live signal.</p>
+        <p><strong>🗺️ Map Mode</strong> — Enables pin placement anywhere, even without GPS or a photo.</p>
+        <p>
+          <strong>📍 Pins</strong> — Click a placed pin to show its toolbar. Use arrow keys to nudge or N/S/E/W to
+          adjust by 1 meter. Copy coordinates or delete the pin.
+        </p>
+        <p><strong>👣 Clear Trail</strong> — Erase all footprints while keeping your reference pins.</p>
+        <p>
+          <strong>💡 Tip</strong> — Place at least two reference pins on features you recognize (trail junctions,
+          landmarks) to enable GPS-to-pixel mapping and automatic footprint tracking.
+        </p>
+      </div>
+      <button id="infoCloseBtn">Close</button>
+    </div>
+
+    <div id="pinOverlay" class="pin-overlay" style="display: none"></div>
+
+    <div id="pinToolbar" class="pin-toolbar" style="display: none">
+      <div class="row" style="align-items: stretch">
+        <div class="pin-arrows">
+          <button data-dir="up"><span data-lucide="chevron-up"></span></button>
+          <div class="row">
+            <button data-dir="left"><span data-lucide="chevron-left"></span></button>
+            <button data-dir="right"><span data-lucide="chevron-right"></span></button>
+          </div>
+          <button data-dir="down"><span data-lucide="chevron-down"></span></button>
+        </div>
+        <div id="pinGpsInfo" class="pin-gps-info"></div>
+        <button id="copyGpsBtn" title="Copy to clipboard"><span data-lucide="clipboard-copy"></span></button>
+      </div>
+      <div
+        id="gpsAdjRow"
+        class="row"
+        style="display: none; align-items: center; gap: 4px; padding: 2px 4px; font-family: monospace; font-size: 11px"
+      >
+        <button
+          data-gps-adj="lat+"
+          style="width: 24px; height: 24px; font-size: 12px; font-weight: bold"
+          title="Lat +1m"
+        >
+          N
+        </button>
+        <span id="pinAdjLat" style="min-width: 70px; text-align: center">0.000000</span>
+        <button
+          data-gps-adj="lat-"
+          style="width: 24px; height: 24px; font-size: 12px; font-weight: bold"
+          title="Lat -1m"
+        >
+          S
+        </button>
+        <span style="color: #ccc">│</span>
+        <button
+          data-gps-adj="lng+"
+          style="width: 24px; height: 24px; font-size: 12px; font-weight: bold"
+          title="Lng +1m"
+        >
+          E
+        </button>
+        <span id="pinAdjLng" style="min-width: 70px; text-align: center">0.000000</span>
+        <button
+          data-gps-adj="lng-"
+          style="width: 24px; height: 24px; font-size: 12px; font-weight: bold"
+          title="Lng -1m"
+        >
+          W
+        </button>
+      </div>
+      <button data-trash><span data-lucide="trash-2"></span></button>
+    </div>
+
+    <script src="lucide.js"></script>
+    <script src="floating-ui.core.umd.js"></script>
+    <script src="floating-ui.dom.umd.js"></script>
+    <script>
+      lucide.createIcons({ size: 32 });
+    </script>
+    <script type="module" src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js");
+      }
+    </script>
+  </body>
 </html>

@@ -47,7 +47,7 @@ export function refreshScaleBar(): void {
   const { mPerDegLat } = getMetersPerDeg(coeffs.p0.lat);
 
   const targetPx = window.innerWidth / 3;
-  const targetMeters = targetPx * mPerDegLat / s;
+  const targetMeters = (targetPx * mPerDegLat) / s;
 
   let niceMeters: number;
   let label: string;
@@ -68,7 +68,7 @@ export function refreshScaleBar(): void {
     }
   }
 
-  const actualPx = niceMeters * s / mPerDegLat;
+  const actualPx = (niceMeters * s) / mPerDegLat;
 
   if (!el) {
     el = document.createElement("div");
@@ -76,23 +76,24 @@ export function refreshScaleBar(): void {
     document.body.appendChild(el);
   }
 
-  el.style.cssText = [
-    "position:fixed",
-    "bottom:40px",
-    "right:16px",
-    "z-index:10",
-    "background:rgba(0,0,0,0.6)",
-    "color:#FF5A00",
-    "font-family:monospace",
-    "font-size:13px",
-    "padding:6px 8px",
-    "border-radius:4px",
-    "display:flex",
-    "flex-direction:column",
-    "align-items:center",
-    "gap:3px",
-    "line-height:1",
-  ].join(";") + ";";
+  el.style.cssText =
+    [
+      "position:fixed",
+      "bottom:40px",
+      "right:16px",
+      "z-index:10",
+      "background:rgba(0,0,0,0.6)",
+      "color:#FF5A00",
+      "font-family:monospace",
+      "font-size:13px",
+      "padding:6px 8px",
+      "border-radius:4px",
+      "display:flex",
+      "flex-direction:column",
+      "align-items:center",
+      "gap:3px",
+      "line-height:1",
+    ].join(";") + ";";
 
   el.innerHTML = `<div style="border-top:2px solid #FF5A00;width:${actualPx}px;margin:0 2px;"></div><span>${label}</span>`;
 }
