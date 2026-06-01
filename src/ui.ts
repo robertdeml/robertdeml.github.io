@@ -76,6 +76,8 @@ fileInput.addEventListener("change", () => {
     st.lastFpLng = null;
     st.rotation = 0;
     st.originalImage = reader.result as string;
+    const titleEl = document.getElementById("appTitle");
+    if (titleEl) titleEl.style.display = "none";
     applyRotation();
   };
   reader.readAsDataURL(file);
