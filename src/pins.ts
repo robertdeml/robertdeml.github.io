@@ -106,7 +106,7 @@ function showAccuracyCircle(pin: SVGElement) {
   if (isNaN(acc) || isNaN(adjLat)) return;
   const x = parseFloat(pin.style.left);
   const y = parseFloat(pin.style.top);
-  const r = accToPixelRadius(acc, adjLat);
+  const r = accToPixelRadius(acc);
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
   svg.style.cssText = `position:absolute;left:${x - r - 5}px;top:${y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;

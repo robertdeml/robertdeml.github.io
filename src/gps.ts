@@ -30,7 +30,7 @@ export function updateGpsPin(lat: number, lng: number, acc?: string) {
   if (acc) {
     const accNum = parseFloat(acc);
     if (!isNaN(accNum)) {
-      const r = accToPixelRadius(accNum, lat);
+      const r = accToPixelRadius(accNum);
       const ns = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(ns, "svg");
       svg.style.cssText = `position:absolute;left:${pos.x - r - 5}px;top:${pos.y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;

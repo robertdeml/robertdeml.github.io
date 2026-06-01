@@ -66,7 +66,7 @@ export function gpsToPixel(lat: number, lng: number) {
 
 /** Converts GPS accuracy (meters) to a pixel radius on screen.
  *  Capped at MAX_ACC_RADIUS_PX to prevent over-sized circles. */
-export function accToPixelRadius(accMeters: number, lat: number): number {
+export function accToPixelRadius(accMeters: number): number {
   const coeffs = getTransformCoeffs();
   if (!coeffs) return 10;
   const { a, b } = coeffs;

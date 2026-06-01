@@ -7,7 +7,7 @@
     "build:ts": "tsc",
     "build:html": "copyfiles -u 1 web/**/* dist && copyfiles -f node_modules/lucide/dist/umd/lucide.js node_modules/@floating-ui/dom/dist/floating-ui.dom.umd.js node_modules/@floating-ui/core/dist/floating-ui.core.umd.js dist",
     "typecheck": "node node_modules/typescript/bin/tsc --noEmit",
-    "lint": "node node_modules/typescript/bin/tsc --noEmit",
+    "lint": "eslint src/",
     "watch": "npm-run-all -p watch:*",
     "watch:ts": "tsc --watch",
     "watch:html": "onchange \"web/**\" -- npm run build:html",
@@ -21,12 +21,15 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "copyfiles": "^2.4.1",
+    "eslint": "^10.4.1",
     "local-ssl-proxy": "^2.0.5",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.1.0",
     "serve": "^14.2.6",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.0"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
