@@ -426,3 +426,113 @@ gpsAdjRow?.querySelectorAll("[data-gps-adj]").forEach((btn) => {
     clampAndApplyGps(st.activePin, adjLat, adjLng);
   });
 });
+
+/* ============================================================
+ * Trail replay — sequentially reveals footprints in green,
+ * then fades them to standard orange.
+ * ============================================================ */
+
+/** Creates a green accuracy circle for the replay animation. */
+function createReplayCircle(lat: number, lng: number, acc: number, px: number, py: number): SVGElement {
+  const ns = "http://www.w3.org/2000/svg";
+  const r = Math.max(accToPixelRadius(acc), 2);
+  const svg = document.createElementNS(ns, "svg");
+  svg.dataset.type = "replay-fp";
+  svg.style.cssText = `position:absolute;left:${px - r - 5}px;top:${py - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:6;`;
+  const circle = document.createElementNS(ns, "circle");
+  circle.setAttribute("cx", (r + 5).toString());
+  circle.setAttribute("cy", (r + 5).toString());
+  circle.setAttribute("r", r.toString());
+  circle.style.fill = "rgba(34, 197, 94, 0.2)";
+  circle.style.stroke = "#22c55e";
+  circle.style.strokeWidth = "2.5";
+  svg.appendChild(circle);
+  pinContainer.appendChild(svg);
+  return svg;
+}
+
+/** Advances the replay animation by one frame. */
+function replayTick() {
+  if (st.replayCurIndex >= st.replayPositions.length) {
+    // All shown — turn last one standard, then clean up
+    const last = st.replayEls[st.replayEls.length - 1];
+    if (last) { const c = last.querySelector("circle"); if (c) { c.style.fill = "rgba(255, 90, 0, 0.08)"; c.style.stroke = "#FF5A00"; c.style.strokeWidth = "1.5"; } }
+    if (st.replayIntervalId !== null) { clearInterval(st.replayIntervalId); st.replayIntervalId = null; }
+    st.replayFinishTimeout = setTimeout(() => stopReplay(), 1000);
+    return;
+  }
+
+  const pos = st.replayPositions[st.replayCurIndex];
+  const pixelPos = gpsToPixel(pos.lat, pos.lng);
+  if (!pixelPos) { stopReplay(); return; }
+
+  // Previous footprint → standard orange
+  if (st.replayCurIndex > 0) {
+    const prev = st.replayEls[st.replayCurIndex - 1];
+    if (prev) { const c = prev.querySelector("circle"); if (c) { c.style.fill = "rgba(255, 90, 0, 0.08)"; c.style.stroke = "#FF5A00"; c.style.strokeWidth = "1.5"; } }
+  }
+
+  // Current → green
+  st.replayEls.push(createReplayCircle(pos.lat, pos.lng, pos.acc, pixelPos.x, pixelPos.y));
+  st.replayCurIndex++;
+}
+
+/** Starts replay animation of the footprint trail.
+ *  Toggles: if already playing, stops and restores the map. */
+export function startReplay() {
+  if (st.replayActive) { stopReplay(); return; }
+
+  const fpEls = pinContainer.querySelectorAll<SVGElement>('svg[data-type="footprint"]');
+  if (fpEls.length === 0) {
+    showToast("No footprints to replay");
+    return;
+  }
+
+  // Cache positions and assign sequence numbers
+  st.replayPositions = [];
+  fpEls.forEach((el) => {
+    st.replayPositions.push({
+      lat: parseFloat(el.dataset.lat!),
+      lng: parseFloat(el.dataset.lng!),
+      acc: parseFloat(el.dataset.acc!),
+    });
+    el.dataset.seq = st.replayPositions.length.toString();
+  });
+
+  // Hide everything in pinContainer
+  pinContainer.querySelectorAll<HTMLElement>('svg').forEach((el) => {
+    el.dataset.replayHidden = "1";
+    el.style.display = "none";
+  });
+
+  st.replayActive = true;
+  st.replayCurIndex = 0;
+  st.replayEls = [];
+
+  const topBtn = document.getElementById("replayTopBtn");
+  if (topBtn) topBtn.style.display = "flex";
+
+  // Show the first footprint immediately
+  replayTick();
+
+  st.replayIntervalId = setInterval(replayTick, 500);
+}
+
+/** Stops replay and restores the original map state. */
+export function stopReplay() {
+  st.replayActive = false;
+
+  if (st.replayFinishTimeout !== null) { clearTimeout(st.replayFinishTimeout); st.replayFinishTimeout = null; }
+  if (st.replayIntervalId !== null) { clearInterval(st.replayIntervalId); st.replayIntervalId = null; }
+
+  st.replayEls.forEach((el) => el.remove());
+  st.replayEls = [];
+
+  pinContainer.querySelectorAll<HTMLElement>('[data-replay-hidden]').forEach((el) => {
+    el.style.display = "";
+    el.removeAttribute("data-replay-hidden");
+  });
+
+  const topBtn = document.getElementById("replayTopBtn");
+  if (topBtn) topBtn.style.display = "none";
+}

@@ -267,6 +267,14 @@
       <button id="debugGpsToggle" class="active">GPS Updates: ON</button>
     </div>
 
+    <button id="replayTopBtn"
+      style="display:none;position:fixed;top:1rem;left:50%;transform:translateX(-50%);
+             z-index:30;width:40px;height:40px;border-radius:50%;
+             background:#fff;border:2px solid #22c55e;
+             cursor:pointer;align-items:center;justify-content:center;">
+      <span data-lucide="x" width="18" height="18" style="color:#22c55e;"></span>
+    </button>
+
     <div class="buttons-panel" id="buttonsPanel">
       <button class="hidden"><span data-lucide="lock"></span></button>
       <button class="hidden"><span data-lucide="unlock"></span></button>
@@ -292,6 +300,12 @@
       </button>
       <button class="hidden"><span data-lucide="map-pin"></span></button>
       <button id="infoBtn" title="Help"><span data-lucide="info"></span></button>
+      <button id="replayBtn" title="Replay trail">
+        <div class="icon-stack">
+          <span data-lucide="footprints" width="16" height="16"></span>
+          <span data-lucide="play" class="overlay" width="12" height="12"></span>
+        </div>
+      </button>
       <button id="clearFpBtn" title="Clear trail">
         <div class="icon-stack">
           <span data-lucide="footprints" width="16" height="16"></span>

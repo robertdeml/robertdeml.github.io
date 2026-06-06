@@ -25,7 +25,7 @@ import {
   pinContainer,
   mapBg,
 } from "./state.js";
-import { placePin, updateDistanceDisplay } from "./pins.js";
+import { placePin, updateDistanceDisplay, startReplay, stopReplay } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 
@@ -203,3 +203,9 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     updateDistanceDisplay();
   }
 });
+
+/* --- Replay trail button --- */
+document.getElementById("replayBtn")?.addEventListener("click", startReplay);
+
+/* --- Top stop button while replaying --- */
+document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);
