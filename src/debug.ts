@@ -8,7 +8,7 @@
 
 import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, statusEl, isLocal } from "./state.js";
 import { placeFootprint } from "./pins.js";
-import { updateGpsPin, removeGpsPin } from "./gps.js";
+import { updateGpsPin, removeGpsPin, resetGpsTimeout, setGpsPinColor } from "./gps.js";
 
 /* Hide debug controls on the live site; only show them locally. */
 if (!isLocal) {
@@ -21,7 +21,8 @@ if (!isLocal) {
  *  the green GPS pin. Called on each input change and every 1s
  *  while debug mode is active. */
 function updateDebugGps() {
-  if (st.watchId === null) return;
+  if (st.watchId === null || !st.debugGpsEnabled) return;
+  resetGpsTimeout();
   const lat = parseFloat(debugLatInput.value);
   const lng = parseFloat(debugLonInput.value);
   if (isNaN(lat) || isNaN(lng)) return;
@@ -64,6 +65,22 @@ if (testBtn && isLocal) {
       }
     }
   });
+}
+
+/* --- Wire debug GPS toggle (local only) --- */
+if (isLocal) {
+  const toggleBtn = document.getElementById("debugGpsToggle") as HTMLButtonElement;
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      st.debugGpsEnabled = !st.debugGpsEnabled;
+      toggleBtn.classList.toggle("active", st.debugGpsEnabled);
+      toggleBtn.textContent = st.debugGpsEnabled ? "GPS Updates: ON" : "GPS Updates: OFF";
+      if (st.debugGpsEnabled) {
+        updateDebugGps();
+      }
+    });
+  }
 }
 
 /* --- Wire live input events (local only) --- */

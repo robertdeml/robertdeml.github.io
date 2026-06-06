@@ -11,6 +11,34 @@ import { createPinSvg } from "./pins.js";
 import { gpsToPixel, accToPixelRadius } from "./transform.js";
 import { placeFootprint } from "./pins.js";
 
+const GPS_GREEN = "#22c55e";
+const GPS_YELLOW = "#eab308";
+
+export function setGpsPinColor(
+  fill: string,
+  accFill: string,
+  accStroke: string,
+) {
+  if (st.gpsPin) st.gpsPin.style.fill = fill;
+  if (st.gpsAccCircle) {
+    const c = st.gpsAccCircle.querySelector("circle");
+    if (c) {
+      c.style.fill = accFill;
+      c.style.stroke = accStroke;
+    }
+  }
+}
+
+/** Resets the 60-second stale-GPS timer.  Fires and turns the pin
+ *  yellow when no position arrives within the window. */
+export function resetGpsTimeout() {
+  if (st.gpsTimeoutId !== null) clearTimeout(st.gpsTimeoutId);
+  st.gpsTimeoutId = setTimeout(() => {
+    setGpsPinColor(GPS_YELLOW, "rgba(234, 179, 8, 0.1)", GPS_YELLOW);
+    st.gpsTimeoutId = null;
+  }, 60000);
+}
+
 /** Removes the green GPS pin and its accuracy circle from the DOM. */
 export function removeGpsPin() {
   if (st.gpsPin) {
@@ -55,19 +83,23 @@ export function updateGpsPin(lat: number, lng: number, acc?: string) {
   }
 }
 
-/** Stops GPS watching, clears state, and removes the GPS pin. */
+/** Stops GPS watching, clears state, and turns the GPS pin yellow. */
 function stopTracking() {
   if (st.watchId !== null) {
     navigator.geolocation.clearWatch(st.watchId);
     st.watchId = null;
   }
+  if (st.gpsTimeoutId !== null) {
+    clearTimeout(st.gpsTimeoutId);
+    st.gpsTimeoutId = null;
+  }
+  setGpsPinColor(GPS_YELLOW, "rgba(234, 179, 8, 0.1)", GPS_YELLOW);
   st.lastGps = null;
   st.lastFpLat = null;
   st.lastFpLng = null;
   st.lastFpAcc = null;
   st.fpBuffer = [];
   st.mapMode = false;
-  removeGpsPin();
   menuBtn?.classList.remove("active");
   compassBtn?.classList.remove("active");
   mapBtn?.classList.remove("active");
@@ -90,6 +122,7 @@ export function startTracking() {
         lng: pos.coords.longitude.toFixed(6),
         acc: pos.coords.accuracy.toFixed(0),
       };
+      resetGpsTimeout();
       if (st.debugActive) return;
       const curLat = pos.coords.latitude;
       const curLng = pos.coords.longitude;

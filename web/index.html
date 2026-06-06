@@ -164,6 +164,18 @@
         font-family: monospace;
         font-size: 13px;
       }
+      .debug-panel button {
+        width: 100%;
+        height: auto;
+        padding: 4px;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .debug-panel button.active {
+        background: #22c55e;
+        color: #fff;
+        border-color: #22c55e;
+      }
       .icon-stack {
         position: relative;
         display: flex;
@@ -252,6 +264,7 @@
       <label>Lat: <input type="number" id="debugLat" step="0.01" value="42.9" /></label>
       <label>Lon: <input type="number" id="debugLon" step="0.01" value="-71.5" /></label>
       <label>Acc: <input type="number" id="debugAcc" step="1" value="20" style="width: 60px" /> m</label>
+      <button id="debugGpsToggle" class="active">GPS Updates: ON</button>
     </div>
 
     <div class="buttons-panel" id="buttonsPanel">
