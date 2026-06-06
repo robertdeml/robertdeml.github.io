@@ -135,7 +135,6 @@ function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: nu
   circle.style.fill = "rgba(255, 90, 0, 0.08)";
   circle.style.stroke = "#FF5A00";
   circle.style.strokeWidth = "1.5";
-  circle.style.strokeDasharray = "4 3";
   svg.appendChild(circle);
   pinContainer.appendChild(svg);
 }
