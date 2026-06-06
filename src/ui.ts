@@ -28,6 +28,7 @@ import {
 import { placePin, updateDistanceDisplay, startReplay, stopReplay } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
+import { VERSION } from "./version.js";
 
 function toggleMenu(open?: boolean) {
   const isOpen = open ?? !panel?.classList.contains("open");
@@ -209,3 +210,7 @@ document.getElementById("replayBtn")?.addEventListener("click", startReplay);
 
 /* --- Top stop button while replaying --- */
 document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);
+
+/* --- Version display --- */
+const verEl = document.getElementById("versionDisplay");
+if (verEl) verEl.textContent = `v${VERSION}`;

@@ -1,0 +1,15 @@
+#!/bin/sh
+# pre-push — Bump the PATCH version in src/version.ts before every push.
+#
+# This creates an extra commit "chore: bump version to X.Y.Z" that
+# is included in the push.  Enable with:
+#   git config core.hooksPath .githooks
+
+set -e
+
+NEW_VER=$(node scripts/bump-version.mjs)
+
+git add src/version.ts
+git commit -m "chore: bump version to $NEW_VER" --no-verify
+
+echo "Bumped version to $NEW_VER"

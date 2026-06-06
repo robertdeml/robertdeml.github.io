@@ -6,6 +6,7 @@
     "build": "npm-run-all -s build:*",
     "build:html": "copyfiles -u 1 web/**/* dist && copyfiles -f node_modules/lucide/dist/umd/lucide.js node_modules/@floating-ui/dom/dist/floating-ui.dom.umd.js node_modules/@floating-ui/core/dist/floating-ui.core.umd.js dist",
     "build:ts": "tsc",
+    "bump": "node scripts/bump-version.mjs",
     "ci": "npm run typecheck && npm run lint && npm run build",
     "clean": "rimraf dist",
     "lint": "eslint src/",
