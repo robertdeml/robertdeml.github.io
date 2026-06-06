@@ -25,7 +25,7 @@ import {
   pinContainer,
   mapBg,
 } from "./state.js";
-import { placePin } from "./pins.js";
+import { placePin, updateDistanceDisplay } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 
@@ -114,6 +114,7 @@ unitsBtnEl?.addEventListener("click", () => {
   st.unit = st.unit === "metric" ? "imperial" : "metric";
   unitsBtnEl.classList.toggle("active", st.unit === "imperial");
   refreshScaleBar();
+  updateDistanceDisplay();
   updateOffscreenIndicator();
 });
 
@@ -197,5 +198,8 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     st.lastFpLng = null;
     st.lastFpAcc = null;
     st.fpBuffer = [];
+    st.totalDistanceM = 0;
+    st.gapBeforeNextFp = false;
+    updateDistanceDisplay();
   }
 });

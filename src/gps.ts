@@ -36,6 +36,7 @@ export function resetGpsTimeout() {
   st.gpsTimeoutId = setTimeout(() => {
     setGpsPinColor(GPS_YELLOW, "rgba(234, 179, 8, 0.1)", GPS_YELLOW);
     st.gpsTimeoutId = null;
+    st.gapBeforeNextFp = true;
   }, 60000);
 }
 
@@ -203,6 +204,7 @@ function stopTracking() {
   st.lastFpLng = null;
   st.lastFpAcc = null;
   st.fpBuffer = [];
+  st.gapBeforeNextFp = true;
   st.mapMode = false;
   menuBtn?.classList.remove("active");
   compassBtn?.classList.remove("active");

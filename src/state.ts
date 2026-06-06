@@ -45,6 +45,8 @@ export const st = {
   lastFpLng: null as number | null,
   lastFpAcc: null as number | null,
   fpBuffer: [] as { lat: number; lng: number; acc: number }[],
+  totalDistanceM: 0 as number,
+  gapBeforeNextFp: false as boolean,
   gpsTimeoutId: null as ReturnType<typeof setTimeout> | null,
   debugActive: false as boolean,
   debugGpsEnabled: true as boolean,

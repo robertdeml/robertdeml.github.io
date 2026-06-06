@@ -91,11 +91,6 @@ function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: numbe
 export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
   if (gpsAcc <= 0) return;
 
-  const newPoint =
-    st.lastFpLat === null ||
-    gpsDistanceMeters(st.lastFpLat, st.lastFpLng!, gpsLat, gpsLng) > st.lastFpAcc! + gpsAcc;
-  if (!newPoint) return;
-
   // First point: just record the position
   if (st.lastFpLat === null) {
     st.lastFpLat = gpsLat;
@@ -103,6 +98,14 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
     st.lastFpAcc = gpsAcc;
     return;
   }
+
+  const dist = gpsDistanceMeters(st.lastFpLat, st.lastFpLng!, gpsLat, gpsLng);
+  if (dist <= st.lastFpAcc! + gpsAcc) return;
+
+  // Accumulate travelled distance (skip across gaps)
+  if (!st.gapBeforeNextFp) st.totalDistanceM += dist;
+  st.gapBeforeNextFp = false;
+  updateDistanceDisplay();
 
   const pos = gpsToPixel(gpsLat, gpsLng);
 
@@ -116,6 +119,23 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
   st.lastFpLat = gpsLat;
   st.lastFpLng = gpsLng;
   st.lastFpAcc = gpsAcc;
+}
+
+/** Formats `st.totalDistanceM` in the current unit and updates the
+ *  `#distanceDisplay` element in the menu panel. */
+export function updateDistanceDisplay() {
+  const el = document.getElementById("distanceDisplay");
+  if (!el) return;
+
+  const m = st.totalDistanceM;
+  let text: string;
+  if (st.unit === "imperial") {
+    const ft = m * 3.28084;
+    text = ft >= 528 ? `${(ft / 5280).toFixed(ft >= 52800 ? 0 : 1)} mi` : `${ft.toFixed(0)} ft`;
+  } else {
+    text = m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${m.toFixed(m >= 10 ? 0 : 1)} m`;
+  }
+  el.textContent = text;
 }
 
 /** Draws a single accuracy-circle footprint at the given pixel position. */
