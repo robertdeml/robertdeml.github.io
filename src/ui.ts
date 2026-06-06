@@ -26,7 +26,7 @@ import {
   mapBg,
 } from "./state.js";
 import { placePin } from "./pins.js";
-import { removeGpsPin, startTracking } from "./gps.js";
+import { removeGpsPin, startTracking, updateGpsPin } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 
 function toggleMenu(open?: boolean) {
@@ -74,6 +74,8 @@ fileInput.addEventListener("change", () => {
     removeGpsPin();
     st.lastFpLat = null;
     st.lastFpLng = null;
+    st.lastFpAcc = null;
+    st.fpBuffer = [];
     st.rotation = 0;
     st.originalImage = reader.result as string;
     const titleEl = document.getElementById("appTitle");
@@ -163,6 +165,11 @@ document.body.addEventListener("click", (e: MouseEvent) => {
     }
   }
   placePin(e.clientX, e.clientY, gps);
+  if (gps) {
+    const lat = parseFloat(gps.lat);
+    const lng = parseFloat(gps.lng);
+    if (!isNaN(lat) && !isNaN(lng)) updateGpsPin(lat, lng, gps.acc);
+  }
 });
 
 /* --- Clear trail: remove all footprints after confirmation --- */
@@ -176,5 +183,6 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     st.lastFpLat = null;
     st.lastFpLng = null;
     st.lastFpAcc = null;
+    st.fpBuffer = [];
   }
 });

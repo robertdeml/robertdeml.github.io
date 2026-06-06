@@ -64,6 +64,8 @@ function stopTracking() {
   st.lastGps = null;
   st.lastFpLat = null;
   st.lastFpLng = null;
+  st.lastFpAcc = null;
+  st.fpBuffer = [];
   removeGpsPin();
   menuBtn?.classList.remove("active");
   compassBtn?.classList.remove("active");

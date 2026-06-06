@@ -85,28 +85,49 @@ function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: numbe
 }
 
 /** Places an accuracy circle footprint at the GPS position when the
- *  distance from the last footprint exceeds the sum of accuracies. */
+ *  distance from the last footprint exceeds the sum of accuracies.
+ *  Before the affine transform is ready, points are buffered and
+ *  replayed once 2+ reference pins are placed. */
 export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
   if (gpsAcc <= 0) return;
-  if (st.lastFpLat !== null && st.lastFpLng !== null && st.lastFpAcc !== null) {
-    const dist = gpsDistanceMeters(st.lastFpLat, st.lastFpLng, gpsLat, gpsLng);
-    if (dist <= st.lastFpAcc + gpsAcc) return;
-  } else {
+
+  const newPoint =
+    st.lastFpLat === null ||
+    gpsDistanceMeters(st.lastFpLat, st.lastFpLng!, gpsLat, gpsLng) > st.lastFpAcc! + gpsAcc;
+  if (!newPoint) return;
+
+  // First point: just record the position
+  if (st.lastFpLat === null) {
     st.lastFpLat = gpsLat;
     st.lastFpLng = gpsLng;
     st.lastFpAcc = gpsAcc;
     return;
   }
+
   const pos = gpsToPixel(gpsLat, gpsLng);
-  if (!pos) return;
+
+  if (!pos) {
+    // Transform not ready — buffer for later
+    st.fpBuffer.push({ lat: gpsLat, lng: gpsLng, acc: gpsAcc });
+  } else {
+    drawAccCircle(gpsLat, gpsLng, gpsAcc, pos.x, pos.y);
+  }
+
+  st.lastFpLat = gpsLat;
+  st.lastFpLng = gpsLng;
+  st.lastFpAcc = gpsAcc;
+}
+
+/** Draws a single accuracy-circle footprint at the given pixel position. */
+function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: number) {
   const ns = "http://www.w3.org/2000/svg";
-  const r = Math.max(accToPixelRadius(gpsAcc), 2);
+  const r = Math.max(accToPixelRadius(acc), 2);
   const svg = document.createElementNS(ns, "svg");
   svg.dataset.type = "footprint";
-  svg.dataset.lat = gpsLat.toFixed(6);
-  svg.dataset.lng = gpsLng.toFixed(6);
-  svg.dataset.acc = gpsAcc.toFixed(0);
-  svg.style.cssText = `position:absolute;left:${pos.x - r - 5}px;top:${pos.y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
+  svg.dataset.lat = lat.toFixed(6);
+  svg.dataset.lng = lng.toFixed(6);
+  svg.dataset.acc = acc.toFixed(0);
+  svg.style.cssText = `position:absolute;left:${px - r - 5}px;top:${py - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
   const circle = document.createElementNS(ns, "circle");
   circle.setAttribute("cx", (r + 5).toString());
   circle.setAttribute("cy", (r + 5).toString());
@@ -117,9 +138,17 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
   circle.style.strokeDasharray = "4 3";
   svg.appendChild(circle);
   pinContainer.appendChild(svg);
-  st.lastFpLat = gpsLat;
-  st.lastFpLng = gpsLng;
-  st.lastFpAcc = gpsAcc;
+}
+
+/** Flushes the GPS point buffer once the affine transform is ready.
+ *  Each buffered point is drawn as an accuracy-circle footprint. */
+function flushFootprintBuffer() {
+  const buf = st.fpBuffer;
+  st.fpBuffer = [];
+  for (const p of buf) {
+    const pos = gpsToPixel(p.lat, p.lng);
+    if (pos) drawAccCircle(p.lat, p.lng, p.acc, pos.x, pos.y);
+  }
 }
 
 /** Shows a dashed accuracy circle around a GPS-tagged pin.
@@ -159,7 +188,7 @@ function hideAccuracyCircle(pin?: SVGElement) {
       delete (pin as any)._accCircle;
     }
   } else {
-    pinContainer.querySelectorAll("svg[data-lat]").forEach((p) => hideAccuracyCircle(p as SVGElement));
+    pinContainer.querySelectorAll('svg[data-lat]:not([data-type="footprint"])').forEach((p) => hideAccuracyCircle(p as SVGElement));
   }
 }
 
@@ -187,10 +216,12 @@ function repositionFootprints() {
 }
 
 /** Iterates all reference pins and shows/hides their accuracy
- *  circles depending on whether the affine transform is ready. */
+ *  circles depending on whether the affine transform is ready.
+ *  When the transform first becomes available, flushed buffered
+ *  GPS points as accuracy-circle footprints. */
 function refreshAccuracyCircles() {
   const hasTransform = getTransformCoeffs() !== null;
-  pinContainer.querySelectorAll("svg[data-lat]").forEach((p) => {
+  pinContainer.querySelectorAll('svg[data-lat]:not([data-type="footprint"])').forEach((p) => {
     const pin = p as SVGElement;
     if (hasTransform) {
       showAccuracyCircle(pin);
@@ -199,6 +230,7 @@ function refreshAccuracyCircles() {
     }
   });
   refreshScaleBar();
+  if (hasTransform) flushFootprintBuffer();
 }
 
 /** Adjusts a pin's GPS coords within its accuracy bounds (clamped),

@@ -14,7 +14,7 @@ const MAX_ACC_RADIUS_PX = 500;
  *  their adjusted GPS coords + pixel positions. */
 function getRefPins() {
   const refs: { lat: number; lng: number; x: number; y: number }[] = [];
-  pinContainer.querySelectorAll("svg[data-lat]").forEach((svg) => {
+  pinContainer.querySelectorAll('svg[data-lat]:not([data-type="footprint"])').forEach((svg) => {
     const el = svg as SVGElement;
     refs.push({
       lat: parseFloat(el.dataset.adjLat ?? el.dataset.lat!),

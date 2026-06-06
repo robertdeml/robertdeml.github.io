@@ -44,6 +44,7 @@ export const st = {
   lastFpLat: null as number | null,
   lastFpLng: null as number | null,
   lastFpAcc: null as number | null,
+  fpBuffer: [] as { lat: number; lng: number; acc: number }[],
   debugActive: false as boolean,
   debugInterval: null as ReturnType<typeof setInterval> | null,
   mapMode: false as boolean,
