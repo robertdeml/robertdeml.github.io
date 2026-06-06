@@ -21,6 +21,7 @@ if (!isLocal) {
  *  the green GPS pin. Called on each input change and every 1s
  *  while debug mode is active. */
 function updateDebugGps() {
+  if (st.watchId === null) return;
   const lat = parseFloat(debugLatInput.value);
   const lng = parseFloat(debugLonInput.value);
   if (isNaN(lat) || isNaN(lng)) return;
