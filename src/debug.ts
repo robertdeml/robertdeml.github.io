@@ -7,7 +7,6 @@
  * ============================================================ */
 
 import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, statusEl, isLocal } from "./state.js";
-import { gpsToPixel } from "./transform.js";
 import { placeFootprint } from "./pins.js";
 import { updateGpsPin, removeGpsPin } from "./gps.js";
 
@@ -17,33 +16,16 @@ if (!isLocal) {
   debugPanel?.classList.add("hidden");
 }
 
-/** Reads the manual lat/lng/acc inputs, places footprints at
- *  20px intervals, and updates the green GPS pin. Called on
- *  each input change and every 1s while debug mode is active. */
+/** Reads the manual lat/lng/acc inputs, places accuracy-circle
+ *  footprints at GPS-distance-threshold intervals, and updates
+ *  the green GPS pin. Called on each input change and every 1s
+ *  while debug mode is active. */
 function updateDebugGps() {
   const lat = parseFloat(debugLatInput.value);
   const lng = parseFloat(debugLonInput.value);
   if (isNaN(lat) || isNaN(lng)) return;
-  if (st.lastFpLat !== null && st.lastFpLng !== null) {
-    const fpPos = gpsToPixel(st.lastFpLat, st.lastFpLng);
-    if (fpPos) {
-      const curPos = gpsToPixel(lat, lng);
-      if (curPos) {
-        const dx = curPos.x - fpPos.x;
-        const dy = curPos.y - fpPos.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 20) {
-          placeFootprint(lat, lng);
-          st.lastFpLat = lat;
-          st.lastFpLng = lng;
-        }
-      }
-    }
-  } else {
-    st.lastFpLat = lat;
-    st.lastFpLng = lng;
-  }
   const acc = parseFloat(debugAccInput.value) || 10;
+  placeFootprint(lat, lng, acc);
   updateGpsPin(lat, lng, acc.toFixed(0));
   statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m`;
   const gp = st.gpsPin;

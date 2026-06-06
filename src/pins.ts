@@ -75,50 +75,51 @@ export function placePin(x: number, y: number, gps?: { lat: string; lng: string;
   refreshAccuracyCircles();
 }
 
-/** Drops a footprint SVG at the GPS-coordinate-derived pixel position.
- *  Called automatically by GPS tracking when the user moves
- *  more than 20px from the previous footprint. */
-export function placeFootprint(gpsLat: number, gpsLng: number) {
+/** Returns approximate GPS distance in meters between two coordinates. */
+function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const avgLat = (lat1 + lat2) / 2;
+  const { mPerDegLat, mPerDegLng } = getMetersPerDeg(avgLat);
+  const dLat = (lat2 - lat1) * mPerDegLat;
+  const dLng = (lng2 - lng1) * mPerDegLng;
+  return Math.sqrt(dLat * dLat + dLng * dLng);
+}
+
+/** Places an accuracy circle footprint at the GPS position when the
+ *  distance from the last footprint exceeds the sum of accuracies. */
+export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
+  if (gpsAcc <= 0) return;
+  if (st.lastFpLat !== null && st.lastFpLng !== null && st.lastFpAcc !== null) {
+    const dist = gpsDistanceMeters(st.lastFpLat, st.lastFpLng, gpsLat, gpsLng);
+    if (dist <= st.lastFpAcc + gpsAcc) return;
+  } else {
+    st.lastFpLat = gpsLat;
+    st.lastFpLng = gpsLng;
+    st.lastFpAcc = gpsAcc;
+    return;
+  }
   const pos = gpsToPixel(gpsLat, gpsLng);
   if (!pos) return;
   const ns = "http://www.w3.org/2000/svg";
+  const r = Math.max(accToPixelRadius(gpsAcc), 2);
   const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("width", "24");
-  svg.setAttribute("height", "24");
+  svg.dataset.type = "footprint";
   svg.dataset.lat = gpsLat.toFixed(6);
   svg.dataset.lng = gpsLng.toFixed(6);
-  svg.style.fill = "none";
-  svg.style.stroke = "#FF5A00";
-  svg.style.strokeWidth = "2";
-  svg.dataset.type = "footprint";
-  svg.style.strokeLinecap = "round";
-  svg.style.strokeLinejoin = "round";
-  svg.style.pointerEvents = "none";
-  svg.style.cursor = "default";
-  svg.style.position = "absolute";
-  svg.style.left = `${pos.x}px`;
-  svg.style.top = `${pos.y}px`;
-  svg.style.transform = "translate(-50%, -100%)";
-  const p1 = document.createElementNS(ns, "path");
-  p1.setAttribute(
-    "d",
-    "M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z",
-  );
-  svg.appendChild(p1);
-  const p2 = document.createElementNS(ns, "path");
-  p2.setAttribute(
-    "d",
-    "M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z",
-  );
-  svg.appendChild(p2);
-  const p3 = document.createElementNS(ns, "path");
-  p3.setAttribute("d", "M16 17h4");
-  svg.appendChild(p3);
-  const p4 = document.createElementNS(ns, "path");
-  p4.setAttribute("d", "M4 13h4");
-  svg.appendChild(p4);
+  svg.dataset.acc = gpsAcc.toFixed(0);
+  svg.style.cssText = `position:absolute;left:${pos.x - r - 5}px;top:${pos.y - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
+  const circle = document.createElementNS(ns, "circle");
+  circle.setAttribute("cx", (r + 5).toString());
+  circle.setAttribute("cy", (r + 5).toString());
+  circle.setAttribute("r", r.toString());
+  circle.style.fill = "rgba(255, 90, 0, 0.08)";
+  circle.style.stroke = "#FF5A00";
+  circle.style.strokeWidth = "1.5";
+  circle.style.strokeDasharray = "4 3";
+  svg.appendChild(circle);
   pinContainer.appendChild(svg);
+  st.lastFpLat = gpsLat;
+  st.lastFpLng = gpsLng;
+  st.lastFpAcc = gpsAcc;
 }
 
 /** Shows a dashed accuracy circle around a GPS-tagged pin.
@@ -166,14 +167,22 @@ function hideAccuracyCircle(pin?: SVGElement) {
  *  Called after reference pin adjustments that affect the transform. */
 function repositionFootprints() {
   pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach((el) => {
-    const svg = el as SVGElement;
+    const svg = el as SVGSVGElement;
     const lat = parseFloat(svg.dataset.lat ?? "");
     const lng = parseFloat(svg.dataset.lng ?? "");
-    if (isNaN(lat) || isNaN(lng)) return;
+    const acc = parseFloat(svg.dataset.acc ?? "");
+    if (isNaN(lat) || isNaN(lng) || isNaN(acc)) return;
     const pos = gpsToPixel(lat, lng);
     if (!pos) return;
-    svg.style.left = `${pos.x}px`;
-    svg.style.top = `${pos.y}px`;
+    const r = Math.max(accToPixelRadius(acc), 2);
+    svg.style.left = `${pos.x - r - 5}px`;
+    svg.style.top = `${pos.y - r - 5}px`;
+    svg.style.width = `${r * 2 + 10}px`;
+    svg.style.height = `${r * 2 + 10}px`;
+    const circle = svg.querySelector("circle")!;
+    circle.setAttribute("cx", (r + 5).toString());
+    circle.setAttribute("cy", (r + 5).toString());
+    circle.setAttribute("r", r.toString());
   });
 }
 

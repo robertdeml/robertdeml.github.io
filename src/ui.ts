@@ -175,5 +175,6 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach((el) => el.remove());
     st.lastFpLat = null;
     st.lastFpLng = null;
+    st.lastFpAcc = null;
   }
 });

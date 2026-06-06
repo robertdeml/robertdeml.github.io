@@ -43,6 +43,7 @@ export const st = {
   gpsAccCircle: null as SVGSVGElement | null,
   lastFpLat: null as number | null,
   lastFpLng: null as number | null,
+  lastFpAcc: null as number | null,
   debugActive: false as boolean,
   debugInterval: null as ReturnType<typeof setInterval> | null,
   mapMode: false as boolean,

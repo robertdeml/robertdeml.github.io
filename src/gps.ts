@@ -87,25 +87,8 @@ export function startTracking() {
       if (st.debugActive) return;
       const curLat = pos.coords.latitude;
       const curLng = pos.coords.longitude;
-      if (st.lastFpLat !== null && st.lastFpLng !== null) {
-        const fpPos = gpsToPixel(st.lastFpLat, st.lastFpLng);
-        if (fpPos) {
-          const curPos = gpsToPixel(curLat, curLng);
-          if (curPos) {
-            const dx = curPos.x - fpPos.x;
-            const dy = curPos.y - fpPos.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 20) {
-              placeFootprint(curLat, curLng);
-              st.lastFpLat = curLat;
-              st.lastFpLng = curLng;
-            }
-          }
-        }
-      } else {
-        st.lastFpLat = curLat;
-        st.lastFpLng = curLng;
-      }
+      const curAcc = pos.coords.accuracy;
+      placeFootprint(curLat, curLng, curAcc);
       updateGpsPin(pos.coords.latitude, pos.coords.longitude, st.lastGps.acc);
       statusEl.textContent = `${st.lastGps.lat}, ${st.lastGps.lng}  ±${st.lastGps.acc}m`;
       const gp = st.gpsPin;
