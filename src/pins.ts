@@ -229,7 +229,10 @@ function refreshAccuracyCircles() {
     }
   });
   refreshScaleBar();
-  if (hasTransform) flushFootprintBuffer();
+  if (hasTransform) {
+    flushFootprintBuffer();
+    repositionFootprints();
+  }
 }
 
 /** Adjusts a pin's GPS coords within its accuracy bounds (clamped),
