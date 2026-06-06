@@ -162,6 +162,21 @@ function hideAccuracyCircle(pin?: SVGElement) {
   }
 }
 
+/** Re-positions all footprints from their stored GPS coordinates.
+ *  Called after reference pin adjustments that affect the transform. */
+function repositionFootprints() {
+  pinContainer.querySelectorAll('svg[data-type="footprint"]').forEach((el) => {
+    const svg = el as SVGElement;
+    const lat = parseFloat(svg.dataset.lat ?? "");
+    const lng = parseFloat(svg.dataset.lng ?? "");
+    if (isNaN(lat) || isNaN(lng)) return;
+    const pos = gpsToPixel(lat, lng);
+    if (!pos) return;
+    svg.style.left = `${pos.x}px`;
+    svg.style.top = `${pos.y}px`;
+  });
+}
+
 /** Iterates all reference pins and shows/hides their accuracy
  *  circles depending on whether the affine transform is ready. */
 function refreshAccuracyCircles() {
@@ -202,6 +217,7 @@ function clampAndApplyGps(pin: SVGElement, newAdjLat: number, newAdjLng: number)
   pin.dataset.adjLat = newAdjLat.toFixed(6);
   pin.dataset.adjLng = newAdjLng.toFixed(6);
   refreshAccuracyCircles();
+  repositionFootprints();
   showToolbar(pin);
 }
 
@@ -276,6 +292,8 @@ pinToolbar.querySelectorAll("[data-dir]").forEach((btn) => {
     const [dx, dy] = moves[dir];
     st.activePin.style.left = `${left + dx}px`;
     st.activePin.style.top = `${top + dy}px`;
+    refreshAccuracyCircles();
+    repositionFootprints();
     showToolbar(st.activePin);
   });
 });
