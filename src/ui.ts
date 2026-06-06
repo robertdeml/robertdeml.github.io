@@ -26,7 +26,7 @@ import {
   mapBg,
 } from "./state.js";
 import { placePin } from "./pins.js";
-import { removeGpsPin } from "./gps.js";
+import { removeGpsPin, startTracking } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 
 function toggleMenu(open?: boolean) {
@@ -79,6 +79,10 @@ fileInput.addEventListener("change", () => {
     const titleEl = document.getElementById("appTitle");
     if (titleEl) titleEl.style.display = "none";
     applyRotation();
+    if (st.watchId === null) startTracking();
+    st.mapMode = true;
+    mapBtn?.classList.add("active");
+    menuBtn?.classList.add("active");
   };
   reader.readAsDataURL(file);
 });

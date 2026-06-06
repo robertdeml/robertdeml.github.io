@@ -73,7 +73,7 @@ function stopTracking() {
 /** Starts GPS watching with high accuracy. On each position
  *  update, places a green GPS pin, auto-drops footprints
  *  every 20px of movement, and updates the status bar. */
-function startTracking() {
+export function startTracking() {
   menuBtn?.classList.add("active");
   compassBtn?.classList.add("active");
   statusEl.style.display = "";
