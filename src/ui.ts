@@ -26,7 +26,7 @@ import {
   mapBg,
 } from "./state.js";
 import { placePin } from "./pins.js";
-import { removeGpsPin, startTracking, updateGpsPin } from "./gps.js";
+import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 
 function toggleMenu(open?: boolean) {
@@ -114,6 +114,7 @@ unitsBtnEl?.addEventListener("click", () => {
   st.unit = st.unit === "metric" ? "imperial" : "metric";
   unitsBtnEl.classList.toggle("active", st.unit === "imperial");
   refreshScaleBar();
+  updateOffscreenIndicator();
 });
 
 /* --- Image rotation: 90° counter-clockwise via canvas --- */

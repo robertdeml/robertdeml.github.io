@@ -50,7 +50,7 @@ export const st = {
   debugGpsEnabled: true as boolean,
   debugInterval: null as ReturnType<typeof setInterval> | null,
   mapMode: false as boolean,
-  unit: "metric" as "metric" | "imperial",
+  unit: "imperial" as "metric" | "imperial",
   rotation: 0,
   originalImage: null as string | null,
   activePin: null as SVGElement | null,
