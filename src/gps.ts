@@ -6,7 +6,7 @@
  * auto-drops footprints when the user moves >20px.
  * ============================================================ */
 
-import { st, compassBtn, menuBtn, pinContainer, statusEl } from "./state.js";
+import { st, compassBtn, menuBtn, mapBtn, pinContainer, statusEl } from "./state.js";
 import { createPinSvg } from "./pins.js";
 import { gpsToPixel, accToPixelRadius } from "./transform.js";
 import { placeFootprint } from "./pins.js";
@@ -66,9 +66,12 @@ function stopTracking() {
   st.lastFpLng = null;
   st.lastFpAcc = null;
   st.fpBuffer = [];
+  st.mapMode = false;
   removeGpsPin();
   menuBtn?.classList.remove("active");
   compassBtn?.classList.remove("active");
+  mapBtn?.classList.remove("active");
+  mapBtn?.setAttribute("disabled", "");
   statusEl.style.display = "none";
 }
 
@@ -78,6 +81,7 @@ function stopTracking() {
 export function startTracking() {
   menuBtn?.classList.add("active");
   compassBtn?.classList.add("active");
+  mapBtn?.removeAttribute("disabled");
   statusEl.style.display = "";
   st.watchId = navigator.geolocation.watchPosition(
     (pos) => {

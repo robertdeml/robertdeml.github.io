@@ -89,8 +89,16 @@ fileInput.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
-/* --- Map Mode toggle: allows pin placement without GPS --- */
+/* --- Map Mode: requires GPS to be active --- */
 mapBtn?.addEventListener("click", () => {
+  if (st.watchId === null) {
+    if (st.mapMode) {
+      st.mapMode = false;
+      mapBtn!.classList.remove("active");
+      menuBtn?.classList.remove("active");
+    }
+    return;
+  }
   st.mapMode = !st.mapMode;
   mapBtn!.classList.toggle("active", st.mapMode);
   if (st.mapMode) {
@@ -142,11 +150,15 @@ rotationBtnEl?.addEventListener("click", () => {
 /* Disables GPS and Map buttons until a photo is loaded. */
 function updateButtonsDisabledState() {
   const hasPhoto = !!mapBg.style.backgroundImage;
-  for (const btn of [compassBtn, mapBtn, rotationBtn]) {
+  for (const btn of [compassBtn, rotationBtn]) {
     if (btn) {
       if (hasPhoto) btn.removeAttribute("disabled");
       else btn.setAttribute("disabled", "");
     }
+  }
+  if (mapBtn) {
+    if (hasPhoto && st.watchId !== null) mapBtn.removeAttribute("disabled");
+    else mapBtn.setAttribute("disabled", "");
   }
 }
 updateButtonsDisabledState();
