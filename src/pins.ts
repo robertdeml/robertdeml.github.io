@@ -94,8 +94,8 @@ export function placeFootprint(gpsLat: number, gpsLng: number) {
   svg.dataset.type = "footprint";
   svg.style.strokeLinecap = "round";
   svg.style.strokeLinejoin = "round";
-  svg.style.pointerEvents = "auto";
-  svg.style.cursor = "pointer";
+  svg.style.pointerEvents = "none";
+  svg.style.cursor = "default";
   svg.style.position = "absolute";
   svg.style.left = `${pos.x}px`;
   svg.style.top = `${pos.y}px`;
@@ -245,13 +245,13 @@ function showToolbar(pin: SVGElement) {
   if (pin.dataset.lat) {
     const x = parseFloat(pin.style.left).toFixed(0);
     const y = parseFloat(pin.style.top).toFixed(0);
-    const adjLat = pin.dataset.adjLat;
-    const adjLng = pin.dataset.adjLng;
+    const adjLat = pin.dataset.adjLat ?? pin.dataset.lat;
+    const adjLng = pin.dataset.adjLng ?? pin.dataset.lng;
     const isAdj = adjLat !== pin.dataset.lat || adjLng !== pin.dataset.lng;
     pinGpsInfo.innerHTML = `<div>Lat: ${pin.dataset.lat}${isAdj ? ` <span style="color:#FF5A00">→ ${adjLat}</span>` : ""}</div><div>Lon: ${pin.dataset.lng}${isAdj ? ` <span style="color:#FF5A00">→ ${adjLng}</span>` : ""}</div><div>Acc: ±${pin.dataset.acc}m</div><div>X: ${x}  Y: ${y}</div>`;
     pinGpsInfo.style.display = "flex";
     copyBtn.style.display = "";
-    gpsAdjRow.style.display = "flex";
+    gpsAdjRow.style.display = "none";
     updateAdjDisplay(pin);
   } else {
     pinGpsInfo.innerHTML = "";
@@ -298,6 +298,18 @@ pinToolbar.querySelectorAll("[data-dir]").forEach((btn) => {
   });
 });
 
+/** Shows a brief toast overlay message that auto-hides after 2 seconds. */
+function showToast(msg: string) {
+  const existing = document.getElementById("toast");
+  if (existing) existing.remove();
+  const el = document.createElement("div");
+  el.id = "toast";
+  el.textContent = msg;
+  el.style.cssText = "position:fixed;bottom:48px;left:50%;transform:translateX(-50%);z-index:50;background:#333;color:#fff;padding:8px 16px;border-radius:6px;font-family:sans-serif;font-size:13px;pointer-events:none;transition:opacity .2s;";
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 200); }, 2000);
+}
+
 pinToolbar.addEventListener("click", (e) => e.stopPropagation());
 document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -305,7 +317,7 @@ document.getElementById("copyGpsBtn")?.addEventListener("click", (e) => {
   const adjLat = st.activePin.dataset.adjLat ?? st.activePin.dataset.lat;
   const adjLng = st.activePin.dataset.adjLng ?? st.activePin.dataset.lng;
   const text = `Lat: ${st.activePin.dataset.lat}\nLon: ${st.activePin.dataset.lng}\nAdjLat: ${adjLat}\nAdjLng: ${adjLng}\nAcc: ±${st.activePin.dataset.acc}m\nX: ${parseFloat(st.activePin.style.left).toFixed(0)}  Y: ${parseFloat(st.activePin.style.top).toFixed(0)}`;
-  navigator.clipboard.writeText(text).catch(() => {
+  navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard")).catch(() => {
     /* clipboard not available */
   });
 });
