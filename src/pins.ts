@@ -156,7 +156,9 @@ function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: nu
   circle.style.stroke = "#FF5A00";
   circle.style.strokeWidth = "1.5";
   svg.appendChild(circle);
+  if (st.pathStyle === "line") svg.style.display = "none";
   pinContainer.appendChild(svg);
+  redrawPath();
 }
 
 /** Flushes the GPS point buffer once the affine transform is ready.
@@ -535,4 +537,74 @@ export function stopReplay() {
 
   const topBtn = document.getElementById("replayTopBtn");
   if (topBtn) topBtn.style.display = "none";
+}
+
+/* ============================================================
+ * Path line — polyline connecting footprint centres.
+ * Three modes: circles, line, both.
+ * ============================================================ */
+
+function getFpCenter(el: SVGElement): { x: number; y: number } | null {
+  const left = parseFloat(el.style.left);
+  const top = parseFloat(el.style.top);
+  if (isNaN(left) || isNaN(top)) return null;
+  const c = el.querySelector("circle");
+  if (!c) return null;
+  const cx = parseFloat(c.getAttribute("cx") || "0");
+  const cy = parseFloat(c.getAttribute("cy") || "0");
+  return { x: left + cx, y: top + cy };
+}
+
+export function redrawPath() {
+  const fps = pinContainer.querySelectorAll<SVGElement>('svg[data-type="footprint"]');
+  const show = st.pathStyle !== "circles";
+
+  if (fps.length < 2 || !show) {
+    if (st.pathPolyline) st.pathPolyline.style.display = "none";
+    return;
+  }
+
+  const pts: string[] = [];
+  fps.forEach((el) => {
+    if (el.style.display === "none") return;
+    const c = getFpCenter(el);
+    if (c) pts.push(`${c.x},${c.y}`);
+  });
+
+  if (pts.length < 2) {
+    if (st.pathPolyline) st.pathPolyline.style.display = "none";
+    return;
+  }
+
+  let svg = st.pathPolyline;
+  if (!svg) {
+    const ns = "http://www.w3.org/2000/svg";
+    svg = document.createElementNS(ns, "svg");
+    svg.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;";
+    pinContainer.appendChild(svg);
+    st.pathPolyline = svg;
+  }
+
+  svg.style.display = "block";
+  svg.innerHTML = `<polyline fill="none" stroke="rgba(255, 90, 0, 0.45)" stroke-width="3" stroke-linejoin="round" points="${pts.join(" ")}"/>`;
+}
+
+/** Cycles the path display style: circles → line → both → circles. */
+export function cyclePathStyle() {
+  const modes: Array<"circles" | "line" | "both"> = ["circles", "line", "both"];
+  const idx = modes.indexOf(st.pathStyle);
+  st.pathStyle = modes[(idx + 1) % 3];
+
+  const showCircles = st.pathStyle !== "line";
+  pinContainer.querySelectorAll<HTMLElement>('svg[data-type="footprint"]').forEach((el) => {
+    el.style.display = showCircles ? "" : "none";
+  });
+
+  redrawPath();
+
+  const btn = document.getElementById("pathStyleBtn");
+  if (!btn) return;
+  btn.classList.toggle("active", st.pathStyle !== "circles");
+  const labels: Record<string, string> = { circles: "Circles only", line: "Line only", both: "Circles + line" };
+  btn.title = labels[st.pathStyle];
 }

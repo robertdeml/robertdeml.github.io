@@ -25,7 +25,7 @@ import {
   pinContainer,
   mapBg,
 } from "./state.js";
-import { placePin, updateDistanceDisplay, startReplay, stopReplay } from "./pins.js";
+import { placePin, updateDistanceDisplay, startReplay, stopReplay, cyclePathStyle, redrawPath } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 import { VERSION } from "./version.js";
@@ -202,6 +202,7 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     st.totalDistanceM = 0;
     st.gapBeforeNextFp = false;
     updateDistanceDisplay();
+    redrawPath();
   }
 });
 
@@ -214,3 +215,6 @@ document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);
 /* --- Version display --- */
 const verEl = document.getElementById("versionDisplay");
 if (verEl) verEl.textContent = `v${VERSION}`;
+
+/* --- Path style toggle --- */
+document.getElementById("pathStyleBtn")?.addEventListener("click", cyclePathStyle);

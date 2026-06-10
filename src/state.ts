@@ -53,6 +53,8 @@ export const st = {
   replayIntervalId: null as ReturnType<typeof setInterval> | null,
   replayFinishTimeout: null as ReturnType<typeof setTimeout> | null,
   replayEls: [] as SVGElement[],
+  pathStyle: "circles" as "circles" | "line" | "both",
+  pathPolyline: null as SVGSVGElement | null,
   gpsTimeoutId: null as ReturnType<typeof setTimeout> | null,
   debugActive: false as boolean,
   debugGpsEnabled: true as boolean,
