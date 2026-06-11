@@ -6,9 +6,9 @@
  * and footprint logic as real GPS tracking.
  * ============================================================ */
 
-import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, statusEl, isLocal } from "./state.js";
+import { st, testBtn, debugPanel, debugLatInput, debugLonInput, debugAccInput, debugAltInput, statusEl, isLocal } from "./state.js";
 import { placeFootprint } from "./pins.js";
-import { updateGpsPin, removeGpsPin, resetGpsTimeout, setGpsPinColor } from "./gps.js";
+import { updateGpsPin, removeGpsPin, resetGpsTimeout } from "./gps.js";
 
 /* Hide debug controls on the live site; only show them locally. */
 if (!isLocal) {
@@ -27,9 +27,10 @@ function updateDebugGps() {
   const lng = parseFloat(debugLonInput.value);
   if (isNaN(lat) || isNaN(lng)) return;
   const acc = parseFloat(debugAccInput.value) || 10;
-  placeFootprint(lat, lng, acc);
+  const alt = parseFloat(debugAltInput.value) || 0;
+  placeFootprint(lat, lng, acc, alt);
   updateGpsPin(lat, lng, acc.toFixed(0));
-  statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m`;
+  statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}  ±${acc}m  ${alt}m`;
   const gp = st.gpsPin;
   if (gp) {
     statusEl.textContent += `  (${parseFloat(gp.style.left).toFixed(0)}, ${parseFloat(gp.style.top).toFixed(0)})`;
@@ -89,4 +90,13 @@ if (isLocal) {
   debugLatInput.addEventListener("input", updateDebugGps);
   debugLonInput.addEventListener("input", updateDebugGps);
   debugAccInput.addEventListener("input", updateDebugGps);
+  debugAltInput.addEventListener("input", updateDebugGps);
+  debugPanel.querySelectorAll("[data-alt-adj]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const step = parseInt((btn as HTMLElement).dataset.altAdj!, 10);
+      debugAltInput.value = String((parseFloat(debugAltInput.value) || 0) + step);
+      updateDebugGps();
+    });
+  });
 }

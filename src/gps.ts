@@ -11,7 +11,6 @@ import { createPinSvg } from "./pins.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { placeFootprint } from "./pins.js";
 
-const GPS_GREEN = "#22c55e";
 const GPS_YELLOW = "#eab308";
 
 export function setGpsPinColor(
@@ -233,7 +232,8 @@ export function startTracking() {
       const curLat = pos.coords.latitude;
       const curLng = pos.coords.longitude;
       const curAcc = pos.coords.accuracy;
-      placeFootprint(curLat, curLng, curAcc);
+      const curAlt = pos.coords.altitude || undefined;
+      placeFootprint(curLat, curLng, curAcc, curAlt);
       updateGpsPin(pos.coords.latitude, pos.coords.longitude, st.lastGps.acc);
       statusEl.textContent = `${st.lastGps.lat}, ${st.lastGps.lng}  ±${st.lastGps.acc}m`;
       const gp = st.gpsPin;

@@ -21,6 +21,7 @@ import {
 } from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { refreshScaleBar } from "./scale.js";
+import { updateElevation } from "./elevation.js";
 
 /** Creates an SVG location-pin element at (x,y).
  *  If `gps` is provided, stores lat/lng/acc as data attributes.
@@ -76,7 +77,7 @@ export function placePin(x: number, y: number, gps?: { lat: string; lng: string;
 }
 
 /** Returns approximate GPS distance in meters between two coordinates. */
-function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
+export function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
   const avgLat = (lat1 + lat2) / 2;
   const { mPerDegLat, mPerDegLng } = getMetersPerDeg(avgLat);
   const dLat = (lat2 - lat1) * mPerDegLat;
@@ -88,7 +89,7 @@ function gpsDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: numbe
  *  distance from the last footprint exceeds the sum of accuracies.
  *  Before the affine transform is ready, points are buffered and
  *  replayed once 2+ reference pins are placed. */
-export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
+export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number, gpsAlt?: number) {
   if (gpsAcc <= 0) return;
 
   // First point: just record the position
@@ -111,9 +112,9 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number) {
 
   if (!pos) {
     // Transform not ready — buffer for later
-    st.fpBuffer.push({ lat: gpsLat, lng: gpsLng, acc: gpsAcc });
+    st.fpBuffer.push({ lat: gpsLat, lng: gpsLng, acc: gpsAcc, alt: gpsAlt });
   } else {
-    drawAccCircle(gpsLat, gpsLng, gpsAcc, pos.x, pos.y);
+    drawAccCircle(gpsLat, gpsLng, gpsAcc, pos.x, pos.y, gpsAlt);
   }
 
   st.lastFpLat = gpsLat;
@@ -139,7 +140,7 @@ export function updateDistanceDisplay() {
 }
 
 /** Draws a single accuracy-circle footprint at the given pixel position. */
-function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: number) {
+function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: number, alt?: number) {
   const ns = "http://www.w3.org/2000/svg";
   const r = Math.max(accToPixelRadius(acc), 2);
   const svg = document.createElementNS(ns, "svg");
@@ -147,6 +148,7 @@ function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: nu
   svg.dataset.lat = lat.toFixed(6);
   svg.dataset.lng = lng.toFixed(6);
   svg.dataset.acc = acc.toFixed(0);
+  if (alt !== undefined) svg.dataset.alt = alt.toFixed(0);
   svg.style.cssText = `position:absolute;left:${px - r - 5}px;top:${py - r - 5}px;width:${r * 2 + 10}px;height:${r * 2 + 10}px;pointer-events:none;z-index:4;`;
   const circle = document.createElementNS(ns, "circle");
   circle.setAttribute("cx", (r + 5).toString());
@@ -159,6 +161,7 @@ function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: nu
   if (st.pathStyle === "line") svg.style.display = "none";
   pinContainer.appendChild(svg);
   redrawPath();
+  updateElevation();
 }
 
 /** Flushes the GPS point buffer once the affine transform is ready.
@@ -168,7 +171,7 @@ function flushFootprintBuffer() {
   st.fpBuffer = [];
   for (const p of buf) {
     const pos = gpsToPixel(p.lat, p.lng);
-    if (pos) drawAccCircle(p.lat, p.lng, p.acc, pos.x, pos.y);
+    if (pos) drawAccCircle(p.lat, p.lng, p.acc, pos.x, pos.y, p.alt);
   }
 }
 

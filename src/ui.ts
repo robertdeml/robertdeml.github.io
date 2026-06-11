@@ -28,6 +28,7 @@ import {
 import { placePin, updateDistanceDisplay, startReplay, stopReplay, cyclePathStyle, redrawPath } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
+import { showElevation, hideElevation, updateElevation } from "./elevation.js";
 import { VERSION } from "./version.js";
 
 function toggleMenu(open?: boolean) {
@@ -117,6 +118,7 @@ unitsBtnEl?.addEventListener("click", () => {
   refreshScaleBar();
   updateDistanceDisplay();
   updateOffscreenIndicator();
+  updateElevation();
 });
 
 /* --- Image rotation: 90° counter-clockwise via canvas --- */
@@ -203,6 +205,7 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     st.gapBeforeNextFp = false;
     updateDistanceDisplay();
     redrawPath();
+    updateElevation();
   }
 });
 
@@ -218,3 +221,12 @@ if (verEl) verEl.textContent = `v${VERSION}`;
 
 /* --- Path style toggle --- */
 document.getElementById("pathStyleBtn")?.addEventListener("click", cyclePathStyle);
+
+/* --- Elevation profile toggle --- */
+document.getElementById("elevationBtn")?.addEventListener("click", () => {
+  if (st.elevationEnabled) {
+    hideElevation();
+  } else {
+    showElevation();
+  }
+});

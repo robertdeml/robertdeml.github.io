@@ -19,6 +19,7 @@ export const debugPanel = document.getElementById("debugPanel") as HTMLDivElemen
 export const debugLatInput = document.getElementById("debugLat") as HTMLInputElement;
 export const debugLonInput = document.getElementById("debugLon") as HTMLInputElement;
 export const debugAccInput = document.getElementById("debugAcc") as HTMLInputElement;
+export const debugAltInput = document.getElementById("debugAlt") as HTMLInputElement;
 
 export const cameraBtn = document.querySelector('button:has([data-lucide="camera"])');
 export const fileInput = document.getElementById("cameraInput") as HTMLInputElement;
@@ -44,7 +45,7 @@ export const st = {
   lastFpLat: null as number | null,
   lastFpLng: null as number | null,
   lastFpAcc: null as number | null,
-  fpBuffer: [] as { lat: number; lng: number; acc: number }[],
+  fpBuffer: [] as { lat: number; lng: number; acc: number; alt?: number }[],
   totalDistanceM: 0 as number,
   gapBeforeNextFp: false as boolean,
   replayActive: false as boolean,
@@ -55,6 +56,7 @@ export const st = {
   replayEls: [] as SVGElement[],
   pathStyle: "circles" as "circles" | "line" | "both",
   pathPolyline: null as SVGSVGElement | null,
+  elevationEnabled: false as boolean,
   gpsTimeoutId: null as ReturnType<typeof setTimeout> | null,
   debugActive: false as boolean,
   debugGpsEnabled: true as boolean,
