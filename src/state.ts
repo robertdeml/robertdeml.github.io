@@ -66,13 +66,28 @@ export const st = {
   rotation: 0,
   originalImage: null as string | null,
   activePin: null as SVGElement | null,
+
+  // Zoom & pan
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  isPanning: false,
+  panStartX: 0,
+  panStartY: 0,
+  panStartMouseX: 0,
+  panStartMouseY: 0,
+  isPinching: false,
+  pinchStartDist: 0,
+  pinchStartZoom: 1,
+  pinchCenterDocX: 0,
+  pinchCenterDocY: 0,
 };
 
 export const FUI = (window as any).FloatingUIDOM;
 
 export const mapBg = document.createElement("div");
 mapBg.id = "mapBg";
-mapBg.style.cssText = "position:fixed;inset:0;z-index:1;overflow:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;";
+mapBg.style.cssText = "position:fixed;inset:0;z-index:1;overflow:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none;";
 document.body.appendChild(mapBg);
 
 export const pinContainer = document.createElement("div");

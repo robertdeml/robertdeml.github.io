@@ -86,7 +86,8 @@ function formatDist(m: number): string {
 }
 
 /** Shows or hides the off-screen indicator based on the GPS pin
- *  position relative to the viewport. Handles all 8 quadrants. */
+ *  position relative to the viewport. Handles all 8 quadrants.
+ *  Accounts for zoom/pan transform. */
 export function updateOffscreenIndicator() {
   const pin = st.gpsPin;
   const el = getOffscreenEl();
@@ -96,14 +97,18 @@ export function updateOffscreenIndicator() {
   const py = parseFloat(pin.style.top);
   if (isNaN(px) || isNaN(py)) { el.style.display = "none"; return; }
 
+  // Convert document coords to screen coords
+  const sx = px * st.zoom + st.panX;
+  const sy = py * st.zoom + st.panY;
+
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  if (px >= 0 && px <= vw && py >= 0 && py <= vh) { el.style.display = "none"; return; }
+  if (sx >= 0 && sx <= vw && sy >= 0 && sy <= vh) { el.style.display = "none"; return; }
 
   const cx = vw / 2;
   const cy = vh / 2;
-  const dx = px - cx;
-  const dy = py - cy;
+  const dx = sx - cx;
+  const dy = sy - cy;
   const absDx = Math.abs(dx);
   const absDy = Math.abs(dy);
   const pad = 16;
@@ -119,7 +124,7 @@ export function updateOffscreenIndicator() {
   ix = Math.max(8, Math.min(vw - 8, ix));
   iy = Math.max(8, Math.min(vh - 8, iy));
 
-  // Position & rotate the arrow
+  // Position & rotate the arrow using screen coords
   const angle = Math.atan2(dy, dx) * (180 / Math.PI);
   el.style.display = "block";
   el.style.left = `${ix}px`;
@@ -128,7 +133,9 @@ export function updateOffscreenIndicator() {
   if (arrow) arrow.style.transform = `rotate(${angle}deg)`;
 
   // --- Off-screen distance in meters ---
-  const distPx = Math.sqrt((px - ix) ** 2 + (py - iy) ** 2);
+  const screenDistPx = Math.sqrt((sx - ix) ** 2 + (sy - iy) ** 2);
+  // Convert back to document pixels for meters-per-pixel calc
+  const docDistPx = screenDistPx / st.zoom;
   const coeffs = getTransformCoeffs();
   const label = document.getElementById("gpsOffscreenDist") as HTMLElement | null;
   if (!label) return;
@@ -141,7 +148,7 @@ export function updateOffscreenIndicator() {
 
   const s = Math.sqrt(coeffs.a * coeffs.a + coeffs.b * coeffs.b);
   const { mPerDegLat } = getMetersPerDeg(coeffs.p0.lat);
-  const distM = (distPx * mPerDegLat) / s;
+  const distM = (docDistPx * mPerDegLat) / s;
   label.textContent = formatDist(distM);
 
   // Position label toward viewport center (so it's visible inside the border)

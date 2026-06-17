@@ -47,7 +47,7 @@ export function refreshScaleBar(): void {
   const { mPerDegLat } = getMetersPerDeg(coeffs.p0.lat);
 
   const targetPx = window.innerWidth / 3;
-  const targetMeters = (targetPx * mPerDegLat) / s;
+  const targetMeters = (targetPx * mPerDegLat) / s / st.zoom;
 
   let niceMeters: number;
   let label: string;
@@ -68,7 +68,7 @@ export function refreshScaleBar(): void {
     }
   }
 
-  const actualPx = (niceMeters * s) / mPerDegLat;
+  const actualPx = (niceMeters * s) / mPerDegLat * st.zoom;
 
   if (!el) {
     el = document.createElement("div");

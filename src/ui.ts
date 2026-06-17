@@ -79,6 +79,10 @@ fileInput.addEventListener("change", () => {
     st.lastFpAcc = null;
     st.fpBuffer = [];
     st.rotation = 0;
+    st.zoom = 1;
+    st.panX = 0;
+    st.panY = 0;
+    applyZoom();
     st.originalImage = reader.result as string;
     const titleEl = document.getElementById("appTitle");
     if (titleEl) titleEl.style.display = "none";
@@ -168,10 +172,10 @@ function updateButtonsDisabledState() {
 }
 updateButtonsDisabledState();
 
-/* --- Body click: place a reference pin --- */
+/* --- Body click: place a reference pin (zoom-adjusted) --- */
 document.body.addEventListener("click", (e: MouseEvent) => {
   if (!mapBg.style.backgroundImage) return;
-  if (st.watchId === null && !st.debugActive && !st.mapMode) return;
+  if (!st.mapMode) return;
   let gps = st.lastGps ?? undefined;
   if (st.debugActive) {
     const lat = parseFloat(debugLatInput.value);
@@ -181,7 +185,8 @@ document.body.addEventListener("click", (e: MouseEvent) => {
       gps = { lat: lat.toFixed(6), lng: lng.toFixed(6), acc: acc.toFixed(0) };
     }
   }
-  placePin(e.clientX, e.clientY, gps);
+  const [docX, docY] = screenToDoc(e.clientX, e.clientY);
+  placePin(docX, docY, gps);
   if (gps) {
     const lat = parseFloat(gps.lat);
     const lng = parseFloat(gps.lng);
@@ -230,3 +235,95 @@ document.getElementById("elevationBtn")?.addEventListener("click", () => {
     showElevation();
   }
 });
+
+/* ============================================================
+ * Pinch-to-zoom & pan
+ * ============================================================ */
+
+export function applyZoom() {
+  const t = `translate(${st.panX}px, ${st.panY}px) scale(${st.zoom})`;
+  mapBg.style.transform = t;
+  mapBg.style.transformOrigin = "0 0";
+  pinContainer.style.transform = t;
+  pinContainer.style.transformOrigin = "0 0";
+  pinContainer.style.setProperty("--zoom", st.zoom.toString());
+  refreshScaleBar();
+}
+
+export function screenToDoc(sx: number, sy: number): [number, number] {
+  return [(sx - st.panX) / st.zoom, (sy - st.panY) / st.zoom];
+}
+
+function getTouchDist(t1: Touch, t2: Touch): number {
+  const dx = t1.clientX - t2.clientX;
+  const dy = t1.clientY - t2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getTouchCenter(t1: Touch, t2: Touch): [number, number] {
+  return [(t1.clientX + t2.clientX) / 2, (t1.clientY + t2.clientY) / 2];
+}
+
+/* --- Touch: pan (1 finger) & pinch-zoom (2 fingers) --- */
+mapBg.addEventListener("touchstart", (e: TouchEvent) => {
+  if (!mapBg.style.backgroundImage) return;
+  if (e.touches.length === 1) {
+    st.isPanning = true;
+    st.isPinching = false;
+    st.panStartX = st.panX;
+    st.panStartY = st.panY;
+    st.panStartMouseX = e.touches[0].clientX;
+    st.panStartMouseY = e.touches[0].clientY;
+  } else if (e.touches.length === 2) {
+    st.isPinching = true;
+    st.isPanning = false;
+    st.pinchStartDist = getTouchDist(e.touches[0], e.touches[1]);
+    st.pinchStartZoom = st.zoom;
+    const [cx, cy] = getTouchCenter(e.touches[0], e.touches[1]);
+    st.pinchCenterDocX = (cx - st.panX) / st.zoom;
+    st.pinchCenterDocY = (cy - st.panY) / st.zoom;
+  }
+});
+
+mapBg.addEventListener("touchmove", (e: TouchEvent) => {
+  if (!mapBg.style.backgroundImage) return;
+  if (st.isPanning && e.touches.length === 1) {
+    st.panX = st.panStartX + (e.touches[0].clientX - st.panStartMouseX);
+    st.panY = st.panStartY + (e.touches[0].clientY - st.panStartMouseY);
+    applyZoom();
+  } else if (st.isPinching && e.touches.length >= 2) {
+    const dist = getTouchDist(e.touches[0], e.touches[1]);
+    if (dist < 5) return;
+    const scale = dist / st.pinchStartDist;
+    let newZoom = st.pinchStartZoom * scale;
+    newZoom = Math.max(0.25, Math.min(10, newZoom));
+    st.zoom = newZoom;
+    const [cx, cy] = getTouchCenter(e.touches[0], e.touches[1]);
+    st.panX = cx - st.pinchCenterDocX * st.zoom;
+    st.panY = cy - st.pinchCenterDocY * st.zoom;
+    applyZoom();
+  }
+});
+
+let _touchendTimeout: ReturnType<typeof setTimeout> | null = null;
+mapBg.addEventListener("touchend", () => {
+  if (_touchendTimeout) clearTimeout(_touchendTimeout);
+  _touchendTimeout = setTimeout(() => {
+    st.isPanning = false;
+    st.isPinching = false;
+  }, 80);
+});
+
+/* --- Mouse wheel zoom (desktop) --- */
+mapBg.addEventListener("wheel", (e: WheelEvent) => {
+  if (!mapBg.style.backgroundImage) return;
+  e.preventDefault();
+  const delta = -e.deltaY * 0.001;
+  const newZoom = Math.max(0.25, Math.min(10, st.zoom * (1 + delta)));
+  const docX = (e.clientX - st.panX) / st.zoom;
+  const docY = (e.clientY - st.panY) / st.zoom;
+  st.zoom = newZoom;
+  st.panX = e.clientX - docX * st.zoom;
+  st.panY = e.clientY - docY * st.zoom;
+  applyZoom();
+}, { passive: false });

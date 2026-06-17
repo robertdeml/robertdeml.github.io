@@ -53,6 +53,7 @@ export function createPinSvg(
   svg.style.left = `${x}px`;
   svg.style.top = `${y}px`;
   svg.style.transform = "translate(-50%, -100%)";
+  svg.classList.add("counter-scale");
   const path = document.createElementNS(ns, "path");
   path.setAttribute(
     "d",
