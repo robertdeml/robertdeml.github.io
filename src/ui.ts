@@ -29,7 +29,7 @@ import { placePin, updateDistanceDisplay, startReplay, stopReplay, cyclePathStyl
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 import { showElevation, hideElevation, updateElevation } from "./elevation.js";
-import { VERSION } from "./version.js";
+import { VERSION, checkVersion } from "./version.js";
 
 function toggleMenu(open?: boolean) {
   const isOpen = open ?? !panel?.classList.contains("open");
@@ -172,9 +172,8 @@ function updateButtonsDisabledState() {
 }
 updateButtonsDisabledState();
 
-/* --- Body click: place a reference pin (zoom-adjusted) --- */
-document.body.addEventListener("click", (e: MouseEvent) => {
-  if (!mapBg.style.backgroundImage) return;
+/* --- Map click: place a reference pin (zoom-adjusted) --- */
+mapBg.addEventListener("click", (e: MouseEvent) => {
   if (!st.mapMode) return;
   let gps = st.lastGps ?? undefined;
   if (st.debugActive) {
@@ -185,7 +184,7 @@ document.body.addEventListener("click", (e: MouseEvent) => {
       gps = { lat: lat.toFixed(6), lng: lng.toFixed(6), acc: acc.toFixed(0) };
     }
   }
-  const [docX, docY] = screenToDoc(e.clientX, e.clientY);
+  const [docX, docY] = screenToDoc(e.clientX, e.clientY);  
   placePin(docX, docY, gps);
   if (gps) {
     const lat = parseFloat(gps.lat);
@@ -223,6 +222,9 @@ document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);
 /* --- Version display --- */
 const verEl = document.getElementById("versionDisplay");
 if (verEl) verEl.textContent = `v${VERSION}`;
+
+/* --- Reload / version check --- */
+document.getElementById("reloadBtn")?.addEventListener("click", checkVersion);
 
 /* --- Path style toggle --- */
 document.getElementById("pathStyleBtn")?.addEventListener("click", cyclePathStyle);
