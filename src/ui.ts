@@ -222,6 +222,8 @@ document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);
 /* --- Version display --- */
 const verEl = document.getElementById("versionDisplay");
 if (verEl) verEl.textContent = `v${VERSION}`;
+const infoVerEl = document.getElementById("infoVersion");
+if (infoVerEl) infoVerEl.textContent = `v${VERSION}`;
 
 /* --- Reload / version check --- */
 document.getElementById("reloadBtn")?.addEventListener("click", checkVersion);
