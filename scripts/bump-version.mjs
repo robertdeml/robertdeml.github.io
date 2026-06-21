@@ -1,8 +1,11 @@
 #!/usr/bin/env node
-// bump-version — Increment the PATCH number in src/version.ts.
+// bump-version — Increment version in src/version.ts.
 //
 // Usage:
-//   node scripts/bump-version.mjs
+//   node scripts/bump-version.mjs        (patch bump, default)
+//   node scripts/bump-version.mjs patch
+//   node scripts/bump-version.mjs minor
+//   node scripts/bump-version.mjs major
 //
 // The file must contain a line matching:
 //   export const VERSION = "MAJOR.MINOR.PATCH";
@@ -22,8 +25,25 @@ if (!match) {
   process.exit(1);
 }
 
-const [, major, minor, patch] = match;
-const newVer = `${major}.${minor}.${Number(patch) + 1}`;
+let [, major, minor, patch] = match.map(Number);
+const level = (process.argv[2] || "patch").toLowerCase();
+
+switch (level) {
+  case "major":
+    major++;
+    minor = 0;
+    patch = 0;
+    break;
+  case "minor":
+    minor++;
+    patch = 0;
+    break;
+  default:
+    patch++;
+    break;
+}
+
+const newVer = `${major}.${minor}.${patch}`;
 
 const newContent = content.replace(
   /export const VERSION = "\d+\.\d+\.\d+";/,

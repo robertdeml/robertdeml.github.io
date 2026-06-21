@@ -1,15 +1,47 @@
 #!/bin/sh
-# pre-push — Bump the PATCH version in src/version.ts before every push.
-#
-# This creates an extra commit "chore: bump version to X.Y.Z" that
-# is included in the push.  Enable with:
-#   git config core.hooksPath .githooks
+# pre-push — Read conventional commits, bump version accordingly,
+# then commit the new version before pushing.
 
 set -e
 
-NEW_VER=$(node scripts/bump-version.mjs)
+determine_bump() {
+  bump="patch"
+  while IFS= read -r line; do
+    # Strip scope and check for breaking change markers
+    msg=$(echo "$line" | sed 's/([^)]*)//g')
+    case "$msg" in
+      *"BREAKING CHANGE"*|*"BREAKING"*|*"!:"*) bump="major" ;;
+      *)
+        if echo "$msg" | grep -q "^feat"; then
+          [ "$bump" = "patch" ] && bump="minor"
+        fi
+        ;;
+    esac
+  done
+  echo "$bump"
+}
 
-git add src/version.ts
-git commit -m "chore: bump version to $NEW_VER" --no-verify
+while read local_ref local_sha remote_ref remote_sha; do
+  # Skip deletion refs (all zeros)
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
 
-echo "Bumped version to $NEW_VER"
+  # Determine commit range
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # New branch — use all commits reachable from local not in remote
+    range="${local_sha} --not --remotes"
+  else
+    range="${remote_sha}..${local_sha}"
+  fi
+
+  messages=$(git log --format="%s" $range 2>/dev/null || true)
+  [ -z "$messages" ] && continue
+
+  bump=$(echo "$messages" | determine_bump)
+
+  NEW_VER=$(node scripts/bump-version.mjs "$bump")
+
+  git add src/version.ts
+  git commit -m "chore: bump version to $NEW_VER" --no-verify
+
+  echo "Bumped version to $NEW_VER ($bump)"
+done

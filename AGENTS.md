@@ -38,8 +38,9 @@ npm run prettier    # prettier --check src/ web/
 ## Version bumping
 
 - Pre-push hook (`.githooks/pre-push`) auto-bumps patch in `src/version.ts` and commits it.
-- Enable with: `git config core.hooksPath .githooks`
-- Manually: `node scripts/bump-version.mjs`
+- Conventional commit format enforced by `.githooks/commit-msg`.
+- Enable hooks: `git config core.hooksPath .githooks`
+- Manual: `node scripts/bump-version.mjs`
 
 ## Service worker
 
