@@ -204,6 +204,25 @@ button:disabled:hover {
   width: 32px;
   height: 32px;
 }
+.path-indicators {
+  position: absolute;
+  bottom: 1px;
+  display: flex;
+  gap: 1px;
+  align-items: center;
+}
+.path-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.path-slash {
+  width: 7px;
+  height: 1.5px;
+  background: currentColor;
+  transform: rotate(-45deg);
+}
 .icon-stack .overlay {
   position: absolute;
   opacity: 0.85;

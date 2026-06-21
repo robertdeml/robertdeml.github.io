@@ -608,7 +608,11 @@ export function cyclePathStyle() {
 
   const btn = document.getElementById("pathStyleBtn");
   if (!btn) return;
-  btn.classList.toggle("active", st.pathStyle !== "circles");
   const labels: Record<string, string> = { circles: "Circles only", line: "Line only", both: "Circles + line" };
   btn.title = labels[st.pathStyle];
+
+  const dot = btn.querySelector(".path-dot") as HTMLElement;
+  const slash = btn.querySelector(".path-slash") as HTMLElement;
+  if (dot) dot.style.display = st.pathStyle !== "line" ? "" : "none";
+  if (slash) slash.style.display = st.pathStyle !== "circles" ? "" : "none";
 }
