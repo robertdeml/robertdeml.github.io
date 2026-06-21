@@ -57,6 +57,7 @@ export const st = {
   pathPolyline: null as SVGSVGElement | null,
   elevationEnabled: false as boolean,
   gpsTimeoutId: null as ReturnType<typeof setTimeout> | null,
+  wakeLock: null as WakeLockSentinel | null,
   debugActive: false as boolean,
   debugGpsEnabled: true as boolean,
   debugInterval: null as ReturnType<typeof setInterval> | null,

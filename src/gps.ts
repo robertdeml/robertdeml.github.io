@@ -195,6 +195,12 @@ export function updateGpsPin(lat: number, lng: number, acc?: string) {
 }
 
 /** Stops GPS watching, clears state, and turns the GPS pin yellow. */
+async function releaseWakeLock() {
+  if (st.wakeLock) {
+    try { await st.wakeLock.release(); } catch { /* ignore */ }
+    st.wakeLock = null;
+  }
+}
 function stopTracking() {
   if (st.watchId !== null) {
     navigator.geolocation.clearWatch(st.watchId);
@@ -216,13 +222,22 @@ function stopTracking() {
   compassBtn?.classList.remove("active");
   mapBtn?.classList.remove("active");
   mapBtn?.setAttribute("disabled", "");
+  releaseWakeLock();
   statusEl.style.display = "none";
 }
 
 /** Starts GPS watching with high accuracy. On each position
  *  update, places a green GPS pin, auto-drops footprints
  *  every 20px of movement, and updates the status bar. */
+async function requestWakeLock() {
+  try {
+    st.wakeLock = await navigator.wakeLock.request("screen");
+    st.wakeLock.addEventListener("release", () => { st.wakeLock = null; });
+  } catch { /* wake lock not supported or denied */ }
+}
+
 export function startTracking() {
+  requestWakeLock();
   menuBtn?.classList.add("active");
   compassBtn?.classList.add("active");
   mapBtn?.removeAttribute("disabled");
