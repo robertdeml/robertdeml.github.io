@@ -78,6 +78,7 @@
         <span data-lucide="rotate-ccw"></span>
       </button>
       <button class="hidden"><span data-lucide="map-pin"></span></button>
+      <button id="essentialsBtn" title="10 Essentials"><span data-lucide="list-checks"></span></button>
       <button id="infoBtn" title="Help"><span data-lucide="info"></span></button>
       <button id="replayBtn" title="Replay trail">
         <div class="icon-stack">
@@ -105,6 +106,23 @@
     </div>
 
     <div id="infoOverlay" class="info-overlay"></div>
+    <div id="essentialsOverlay" class="essentials-overlay"></div>
+    <div id="essentialsDialog" class="essentials-dialog">
+      <h2>10 Hiking Essentials</h2>
+      <ol class="essentials-list">
+        <li><strong>Navigation</strong> — paper map &amp; compass</li>
+        <li><strong>Headlamp</strong> — with extra batteries</li>
+        <li><strong>Sun protection</strong> — sunscreen, sunglasses, sun-protective clothing</li>
+        <li><strong>First aid kit</strong> — including moleskin/blister care</li>
+        <li><strong>Knife / multi-tool</strong></li>
+        <li><strong>Fire starter</strong> — matches, lighter, tinder, candle</li>
+        <li><strong>Emergency shelter</strong> — bivy sack or emergency blanket</li>
+        <li><strong>Extra food</strong> — calorie-dense snacks beyond what you expect</li>
+        <li><strong>Extra water</strong> — more than you think, plus purification</li>
+        <li><strong>Extra clothing</strong> — insulating layers and rain gear (avoid cotton)</li>
+      </ol>
+      <button id="essentialsCloseBtn">I'm ready for a hike!</button>
+    </div>
     <div id="infoDialog" class="info-dialog">
       <h2>How to Use HikeNow</h2>
       <div class="info-content">
@@ -188,6 +206,23 @@
     <script src="floating-ui.dom.umd.js"></script>
     <script>
       lucide.createIcons({ size: 32 });
+    </script>
+    <script>
+      const essentialsBtn = document.getElementById("essentialsBtn");
+      const essentialsOverlay = document.getElementById("essentialsOverlay");
+      const essentialsDialog = document.getElementById("essentialsDialog");
+      const essentialsCloseBtn = document.getElementById("essentialsCloseBtn");
+      function openEssentials() {
+        essentialsOverlay.classList.add("open");
+        essentialsDialog.classList.add("open");
+      }
+      function closeEssentials() {
+        essentialsOverlay.classList.remove("open");
+        essentialsDialog.classList.remove("open");
+      }
+      essentialsBtn.addEventListener("click", openEssentials);
+      essentialsCloseBtn.addEventListener("click", closeEssentials);
+      essentialsOverlay.addEventListener("click", closeEssentials);
     </script>
     <script type="module" src="app.js"></script>
     <script>
