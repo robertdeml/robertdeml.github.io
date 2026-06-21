@@ -57,6 +57,30 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+.menu-level {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.distance-display {
+  font-family: monospace;
+  font-size: 13px;
+  color: #FF5A00;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 10px;
+  height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
 button {
   width: 48px;
   height: 48px;
