@@ -137,7 +137,8 @@ export function updateDistanceDisplay() {
   } else {
     text = m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${m.toFixed(m >= 10 ? 0 : 1)} m`;
   }
-  el.textContent = text;
+  const val = document.getElementById("distanceValue");
+  if (val) val.textContent = text;
 }
 
 /** Draws a single accuracy-circle footprint at the given pixel position. */

@@ -82,7 +82,6 @@
             <span data-lucide="ban" class="overlay"></span>
           </div>
         </button>
-        <button id="unitsBtn" title="Units"><span data-lucide="ruler"></span></button>
       </div>
       <div class="menu-level">
         <button id="infoBtn" title="Help"><span data-lucide="info"></span></button>
@@ -91,7 +90,10 @@
         <button id="testBtn" title="Debug"><span data-lucide="bug"></span></button>
       </div>
       <div class="menu-level">
-        <div id="distanceDisplay" class="distance-display">0 m</div>
+        <div id="distanceDisplay" class="distance-display" title="Units">
+          <span data-lucide="ruler" width="14" height="14"></span>
+          <span id="distanceValue">0 m</span>
+        </div>
       </div>
     </div>
 

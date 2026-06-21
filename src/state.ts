@@ -25,7 +25,6 @@ export const cameraBtn = document.querySelector('button:has([data-lucide="camera
 export const fileInput = document.getElementById("cameraInput") as HTMLInputElement;
 
 export const mapBtn = document.getElementById("mapBtn");
-export const unitsBtn = document.getElementById("unitsBtn");
 export const rotationBtn = document.getElementById("rotationBtn");
 
 export const pinToolbar = document.getElementById("pinToolbar") as HTMLDivElement;

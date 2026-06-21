@@ -16,7 +16,6 @@ import {
   fileInput,
   compassBtn,
   mapBtn,
-  unitsBtn,
   rotationBtn,
   st,
   debugLatInput,
@@ -114,11 +113,9 @@ mapBtn?.addEventListener("click", () => {
   }
 });
 
-/* --- Units toggle: switch between metric (m/km) and imperial (mi) --- */
-const unitsBtnEl = unitsBtn;
-unitsBtnEl?.addEventListener("click", () => {
+/* --- Units toggle: click distance display to switch between metric (m/km) and imperial (mi) --- */
+document.getElementById("distanceDisplay")?.addEventListener("click", () => {
   st.unit = st.unit === "metric" ? "imperial" : "metric";
-  unitsBtnEl.classList.toggle("active", st.unit === "imperial");
   refreshScaleBar();
   updateDistanceDisplay();
   updateOffscreenIndicator();
