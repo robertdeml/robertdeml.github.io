@@ -215,6 +215,7 @@ function stopTracking() {
   st.lastFpLat = null;
   st.lastFpLng = null;
   st.lastFpAcc = null;
+  st.lastFpEl = null;
   st.fpBuffer = [];
   st.gapBeforeNextFp = true;
   st.mapMode = false;

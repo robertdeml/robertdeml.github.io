@@ -102,7 +102,25 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number, g
   }
 
   const dist = gpsDistanceMeters(st.lastFpLat, st.lastFpLng!, gpsLat, gpsLng);
-  if (dist <= st.lastFpAcc! + gpsAcc) return;
+  if (dist <= st.lastFpAcc! + gpsAcc) {
+    // New circle fully inside the old one and more accurate — replace
+    if (gpsAcc < st.lastFpAcc! && dist + gpsAcc <= st.lastFpAcc!) {
+      if (st.lastFpEl) {
+        st.lastFpEl.remove();
+        st.lastFpEl = null;
+      }
+      st.lastFpLat = gpsLat;
+      st.lastFpLng = gpsLng;
+      st.lastFpAcc = gpsAcc;
+      const pos = gpsToPixel(gpsLat, gpsLng);
+      if (pos) {
+        drawAccCircle(gpsLat, gpsLng, gpsAcc, pos.x, pos.y, gpsAlt);
+      } else {
+        st.fpBuffer.push({ lat: gpsLat, lng: gpsLng, acc: gpsAcc, alt: gpsAlt });
+      }
+    }
+    return;
+  }
 
   // Accumulate travelled distance (skip across gaps)
   if (!st.gapBeforeNextFp) st.totalDistanceM += dist;
@@ -162,6 +180,7 @@ function drawAccCircle(lat: number, lng: number, acc: number, px: number, py: nu
   svg.appendChild(circle);
   if (st.pathStyle === "line") svg.style.display = "none";
   pinContainer.appendChild(svg);
+  st.lastFpEl = svg;
   redrawPath();
   updateElevation();
 }

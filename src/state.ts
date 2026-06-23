@@ -44,6 +44,7 @@ export const st = {
   lastFpLat: null as number | null,
   lastFpLng: null as number | null,
   lastFpAcc: null as number | null,
+  lastFpEl: null as SVGElement | null,
   fpBuffer: [] as { lat: number; lng: number; acc: number; alt?: number }[],
   totalDistanceM: 0 as number,
   gapBeforeNextFp: false as boolean,

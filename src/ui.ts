@@ -201,6 +201,7 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
     st.lastFpLat = null;
     st.lastFpLng = null;
     st.lastFpAcc = null;
+    st.lastFpEl = null;
     st.fpBuffer = [];
     st.totalDistanceM = 0;
     st.gapBeforeNextFp = false;
