@@ -28,6 +28,7 @@ import { placePin, updateDistanceDisplay, startReplay, stopReplay, cyclePathStyl
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
 import { showElevation, hideElevation, updateElevation } from "./elevation.js";
+import { saveState, restoreState } from "./save.js";
 import { VERSION, checkVersion } from "./version.js";
 
 function toggleMenu(open?: boolean) {
@@ -237,6 +238,10 @@ document.getElementById("elevationBtn")?.addEventListener("click", () => {
     showElevation();
   }
 });
+
+/* --- Save / Load --- */
+document.getElementById("saveBtn")?.addEventListener("click", saveState);
+document.getElementById("loadBtn")?.addEventListener("click", restoreState);
 
 /* ============================================================
  * Pinch-to-zoom & pan

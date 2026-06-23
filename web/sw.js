@@ -10,6 +10,7 @@ const ASSETS = [
   "debug.js",
   "scale.js",
   "ui.js",
+  "save.js",
   "lucide.js",
   "floating-ui.core.umd.js",
   "floating-ui.dom.umd.js",
