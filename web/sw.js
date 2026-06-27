@@ -12,8 +12,6 @@ const ASSETS = [
   "ui.js",
   "save.js",
   "icons.js",
-  "floating-ui.core.umd.js",
-  "floating-ui.dom.umd.js",
   "manifest.json",
   "icon-192.svg",
   "icon-512.svg",

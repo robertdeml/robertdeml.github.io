@@ -86,8 +86,6 @@ export const st = {
   pinchCenterDocY: 0,
 };
 
-export const FUI = (window as any).FloatingUIDOM;
-
 export const mapBg = document.createElement("div");
 mapBg.id = "mapBg";
 mapBg.style.cssText = "position:fixed;inset:0;z-index:1;overflow:hidden;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none;";

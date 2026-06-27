@@ -17,7 +17,6 @@ import {
   gpsAdjRow,
   pinAdjLatEl,
   pinAdjLngEl,
-  FUI,
 } from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { refreshScaleBar } from "./scale.js";
@@ -358,13 +357,28 @@ function showToolbar(pin: SVGElement) {
     copyBtn.style.display = "none";
     gpsAdjRow.style.display = "none";
   }
-  FUI.computePosition(pin, pinToolbar, {
-    placement: "right",
-    middleware: [FUI.flip({ fallbackPlacements: ["left"] }), FUI.shift({ padding: 8 }), FUI.offset(8)],
-  }).then(({ x, y }: { x: number; y: number }) => {
-    pinToolbar.style.left = `${x}px`;
-    pinToolbar.style.top = `${y}px`;
-  });
+  positionToolbar(pin, pinToolbar);
+}
+
+function positionToolbar(ref: Element, float: HTMLElement) {
+  const r = ref.getBoundingClientRect();
+  const f = float.getBoundingClientRect();
+  const gap = 8;
+  const pad = 8;
+
+  let x = r.right + gap;
+  let y = r.top + (r.height - f.height) / 2;
+
+  y = Math.max(pad, Math.min(y, window.innerHeight - f.height - pad));
+
+  if (x + f.width > window.innerWidth - pad) {
+    x = r.left - gap - f.width;
+  }
+
+  x = Math.max(pad, Math.min(x, window.innerWidth - f.width - pad));
+
+  float.style.left = `${x}px`;
+  float.style.top = `${y}px`;
 }
 
 /* --- Event listeners --- */
