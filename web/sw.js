@@ -11,7 +11,7 @@ const ASSETS = [
   "scale.js",
   "ui.js",
   "save.js",
-  "lucide.js",
+  "icons.js",
   "floating-ui.core.umd.js",
   "floating-ui.dom.umd.js",
   "manifest.json",
