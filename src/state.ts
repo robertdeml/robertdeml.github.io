@@ -66,6 +66,8 @@ export const st = {
   unit: "imperial" as "metric" | "imperial",
   rotation: 0,
   originalImage: null as string | null,
+  imageNaturalWidth: 0,
+  imageNaturalHeight: 0,
   activePin: null as SVGElement | null,
 
   // Zoom & pan

@@ -1,19 +1,8 @@
-/* ============================================================
- * scale — Map scale bar.
- *
- * Once the affine transform is ready (2+ reference pins),
- * displays a horizontal scale bar in the bottom-right corner
- * showing a "nice" distance (1, 2, or 5 × 10ⁿ) in m or km
- * with a line approximately ⅓ the viewport width.
- * ============================================================ */
-
 import { getTransformCoeffs, getMetersPerDeg } from "./transform.js";
-import { st } from "./state.js";
+import { st, pinContainer } from "./state.js";
 
 const SCALE_BAR_ID = "mapScaleBar";
 
-/** Rounds a positive target value to the nearest "nice" number:
- *  1, 2, or 5 times a power of 10. */
 function getNiceScale(target: number): number {
   if (target <= 0) return 1;
   const pow10 = Math.pow(10, Math.floor(Math.log10(target)));
@@ -26,25 +15,56 @@ function getNiceScale(target: number): number {
   return nice * pow10;
 }
 
-/** Formats a nice scale value for display, stripping unnecessary
- *  trailing zeros (e.g. "1", "0.5", "2.5"). */
 function formatScaleValue(v: number): string {
   return v % 1 === 0 ? v.toString() : parseFloat(v.toFixed(4)).toString();
 }
 
-/** Creates or updates the scale bar element. Hides it when the
- *  transform is not available (<2 reference pins). */
+function countRefPins(): number {
+  return pinContainer.querySelectorAll<SVGElement>('svg[data-lat]:not([data-type="footprint"])').length;
+}
+
+function getDisplayedImageSize(): { w: number; h: number } | null {
+  if (!st.originalImage || !st.imageNaturalWidth || !st.imageNaturalHeight) return null;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scale = Math.min(vw / st.imageNaturalWidth, vh / st.imageNaturalHeight);
+  return { w: st.imageNaturalWidth * scale, h: st.imageNaturalHeight * scale };
+}
+
 export function refreshScaleBar(): void {
-  const coeffs = getTransformCoeffs();
   let el = document.getElementById(SCALE_BAR_ID) as HTMLDivElement | null;
 
-  if (!coeffs) {
+  const coeffs = getTransformCoeffs();
+  const nPins = countRefPins();
+  const hasPhoto = !!st.originalImage;
+
+  if (!hasPhoto) {
     if (el) el.style.display = "none";
     return;
   }
 
-  const s = Math.sqrt(coeffs.a * coeffs.a + coeffs.b * coeffs.b);
-  const { mPerDegLat } = getMetersPerDeg(coeffs.p0.lat);
+  let s: number;
+  let refLat: number;
+
+  if (coeffs) {
+    s = Math.sqrt(coeffs.a * coeffs.a + coeffs.b * coeffs.b);
+    refLat = coeffs.p0.lat;
+  } else if (nPins < 2 && st.watchId !== null) {
+    const targetMiles = nPins === 0 ? 1 : 0.25;
+    const displayed = getDisplayedImageSize();
+    if (!displayed) {
+      if (el) el.style.display = "none";
+      return;
+    }
+    const longEdgePx = Math.max(displayed.w, displayed.h);
+    refLat = st.lastGps ? parseFloat(st.lastGps.lat) : 40;
+    s = (getMetersPerDeg(refLat).mPerDegLat * longEdgePx) / (targetMiles * 1609.344);
+  } else {
+    if (el) el.style.display = "none";
+    return;
+  }
+
+  const { mPerDegLat } = getMetersPerDeg(refLat);
 
   const targetPx = window.innerWidth / 3;
   const targetMeters = (targetPx * mPerDegLat) / s / st.zoom;
@@ -98,7 +118,6 @@ export function refreshScaleBar(): void {
   el.innerHTML = `<div style="border-top:2px solid #FF5A00;width:${actualPx}px;margin:0 2px;"></div><span>${label}</span>`;
 }
 
-/* --- Refresh on viewport resize (debounced via rAF) --- */
 let resizeTimer: number | null = null;
 window.addEventListener("resize", () => {
   if (resizeTimer) cancelAnimationFrame(resizeTimer);

@@ -361,3 +361,7 @@ button:disabled:hover {
 #essentialsCloseBtn:hover {
   background: #16a34a;
 }
+
+#mapCompass {
+  user-select: none;
+}

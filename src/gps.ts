@@ -10,6 +10,8 @@ import { st, compassBtn, menuBtn, mapBtn, pinContainer, statusEl } from "./state
 import { createPinSvg } from "./pins.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { placeFootprint } from "./pins.js";
+import { refreshCompass } from "./compass.js";
+import { refreshScaleBar } from "./scale.js";
 
 const GPS_YELLOW = "#eab308";
 
@@ -225,6 +227,8 @@ function stopTracking() {
   mapBtn?.setAttribute("disabled", "");
   releaseWakeLock();
   statusEl.style.display = "none";
+  refreshCompass();
+  refreshScaleBar();
 }
 
 /** Starts GPS watching with high accuracy. On each position
@@ -273,6 +277,8 @@ export function startTracking() {
     },
     { enableHighAccuracy: true },
   );
+  refreshCompass();
+  refreshScaleBar();
 }
 
 /* --- Compass button wiring --- */

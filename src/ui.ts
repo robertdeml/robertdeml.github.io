@@ -27,8 +27,10 @@ import {
 import { placePin, updateDistanceDisplay, startReplay, stopReplay, cyclePathStyle, redrawPath } from "./pins.js";
 import { removeGpsPin, startTracking, updateGpsPin, updateOffscreenIndicator } from "./gps.js";
 import { refreshScaleBar } from "./scale.js";
+import { refreshCompass } from "./compass.js";
 import { showElevation, hideElevation, updateElevation } from "./elevation.js";
-import { saveState, restoreState } from "./save.js";
+import { saveState, restoreState, autoSave } from "./save.js";
+import { setAutoSaveHook } from "./pins.js";
 import { VERSION, checkVersion } from "./version.js";
 
 function toggleMenu(open?: boolean) {
@@ -128,6 +130,8 @@ function applyRotation() {
   if (!st.originalImage) return;
   const img = new Image();
   img.onload = () => {
+    st.imageNaturalWidth = img.naturalWidth;
+    st.imageNaturalHeight = img.naturalHeight;
     const canvas = document.createElement("canvas");
     const w = img.naturalWidth;
     const h = img.naturalHeight;
@@ -144,6 +148,7 @@ function applyRotation() {
     ctx.drawImage(img, -w / 2, -h / 2);
     mapBg.style.backgroundImage = `url(${canvas.toDataURL("image/jpeg", 0.92)})`;
     updateButtonsDisabledState();
+    refreshCompass();
   };
   img.src = st.originalImage;
 }
@@ -184,6 +189,7 @@ mapBg.addEventListener("click", (e: MouseEvent) => {
   }
   const [docX, docY] = screenToDoc(e.clientX, e.clientY);  
   placePin(docX, docY, gps);
+  refreshCompass();
   if (gps) {
     const lat = parseFloat(gps.lat);
     const lng = parseFloat(gps.lng);
@@ -243,6 +249,9 @@ document.getElementById("elevationBtn")?.addEventListener("click", () => {
 document.getElementById("saveBtn")?.addEventListener("click", saveState);
 document.getElementById("loadBtn")?.addEventListener("click", restoreState);
 
+/* --- Auto-save on each new footprint --- */
+setAutoSaveHook(autoSave);
+
 /* ============================================================
  * Pinch-to-zoom & pan
  * ============================================================ */
@@ -255,6 +264,7 @@ export function applyZoom() {
   pinContainer.style.transformOrigin = "0 0";
   pinContainer.style.setProperty("--zoom", st.zoom.toString());
   refreshScaleBar();
+  refreshCompass();
 }
 
 export function screenToDoc(sx: number, sy: number): [number, number] {

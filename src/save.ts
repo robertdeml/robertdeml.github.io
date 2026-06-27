@@ -5,7 +5,8 @@ import { refreshScaleBar } from "./scale.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs } from "./transform.js";
 import { applyZoom } from "./ui.js";
 
-const SAVE_KEY = "hikenow-save";
+const DATA_KEY = "hikenow-save";
+const IMAGE_KEY = "hikenow-save-image";
 
 interface RefPinData {
   lat: string;
@@ -26,7 +27,6 @@ interface FpData {
 
 interface SaveData {
   version: 1;
-  image: { data: string | null; rotation: number };
   view: { zoom: number; panX: number; panY: number };
   settings: {
     unit: "metric" | "imperial";
@@ -37,9 +37,10 @@ interface SaveData {
   refPins: RefPinData[];
   footprints: FpData[];
   totalDistanceM: number;
+  rotation: number;
 }
 
-export function saveState() {
+function collectSaveData(): SaveData {
   const refPins: RefPinData[] = [];
   pinContainer.querySelectorAll<SVGElement>('svg[data-lat]:not([data-type="footprint"])').forEach((svg) => {
     refPins.push({
@@ -64,9 +65,8 @@ export function saveState() {
     });
   });
 
-  const data: SaveData = {
+  return {
     version: 1,
-    image: { data: st.originalImage, rotation: st.rotation },
     view: { zoom: st.zoom, panX: st.panX, panY: st.panY },
     settings: {
       unit: st.unit,
@@ -77,10 +77,31 @@ export function saveState() {
     refPins,
     footprints,
     totalDistanceM: st.totalDistanceM,
+    rotation: st.rotation,
   };
+}
+
+export function autoSave() {
+  const data = collectSaveData();
+  try {
+    localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  } catch {
+    // silent fail for autosave
+  }
+}
+
+export function saveState() {
+  const data = collectSaveData();
 
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(IMAGE_KEY, JSON.stringify({ data: st.originalImage }));
+  } catch (e) {
+    showToast("Save failed — storage may be full");
+    return;
+  }
+
+  try {
+    localStorage.setItem(DATA_KEY, JSON.stringify(data));
     showToast("Saved");
   } catch (e) {
     showToast("Save failed — storage may be full");
@@ -88,7 +109,7 @@ export function saveState() {
 }
 
 export function restoreState() {
-  const raw = localStorage.getItem(SAVE_KEY);
+  const raw = localStorage.getItem(DATA_KEY);
   if (!raw) { showToast("No saved state found"); return; }
 
   let data: SaveData;
@@ -105,9 +126,34 @@ export function restoreState() {
   st.lastFpEl = null;
   st.fpBuffer = [];
 
+  // --- Extract image data ---
+  let imageData: string | null = null;
+  let rotation = 0;
+
+  const imageRaw = localStorage.getItem(IMAGE_KEY);
+  if (imageRaw) {
+    try {
+      const img = JSON.parse(imageRaw);
+      imageData = img.data ?? null;
+    } catch {}
+  }
+
+  // Fall back to old embedded-image format
+  if (!imageData) {
+    try {
+      const old = JSON.parse(raw);
+      if (old.image && old.image.data) {
+        imageData = old.image.data;
+        rotation = old.image.rotation ?? 0;
+      }
+    } catch {}
+  } else {
+    rotation = data.rotation ?? 0;
+  }
+
   // Restore image
-  st.originalImage = data.image.data;
-  st.rotation = data.image.rotation;
+  st.originalImage = imageData;
+  st.rotation = rotation;
   if (st.originalImage) {
     applyRotation();
     const titleEl = document.getElementById("appTitle");
@@ -225,6 +271,8 @@ function applyRotation() {
   if (!st.originalImage) return;
   const img = new Image();
   img.onload = () => {
+    st.imageNaturalWidth = img.naturalWidth;
+    st.imageNaturalHeight = img.naturalHeight;
     const canvas = document.createElement("canvas");
     const w = img.naturalWidth;
     const h = img.naturalHeight;

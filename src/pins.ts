@@ -21,7 +21,14 @@ import {
 } from "./state.js";
 import { gpsToPixel, accToPixelRadius, getTransformCoeffs, getMetersPerDeg } from "./transform.js";
 import { refreshScaleBar } from "./scale.js";
+import { refreshCompass } from "./compass.js";
 import { updateElevation } from "./elevation.js";
+
+let _autoSave: (() => void) | null = null;
+
+export function setAutoSaveHook(fn: () => void) {
+  _autoSave = fn;
+}
 
 /** Creates an SVG location-pin element at (x,y).
  *  If `gps` is provided, stores lat/lng/acc as data attributes.
@@ -139,6 +146,7 @@ export function placeFootprint(gpsLat: number, gpsLng: number, gpsAcc: number, g
   st.lastFpLat = gpsLat;
   st.lastFpLng = gpsLng;
   st.lastFpAcc = gpsAcc;
+  _autoSave?.();
 }
 
 /** Formats `st.totalDistanceM` in the current unit and updates the
@@ -194,6 +202,7 @@ function flushFootprintBuffer() {
     const pos = gpsToPixel(p.lat, p.lng);
     if (pos) drawAccCircle(p.lat, p.lng, p.acc, pos.x, pos.y, p.alt);
   }
+  _autoSave?.();
 }
 
 /** Shows a dashed accuracy circle around a GPS-tagged pin.
@@ -275,6 +284,7 @@ function refreshAccuracyCircles() {
     }
   });
   refreshScaleBar();
+  refreshCompass();
   if (hasTransform) {
     flushFootprintBuffer();
     repositionFootprints();
@@ -417,6 +427,7 @@ pinToolbar.querySelector("[data-trash]")?.addEventListener("click", (e) => {
   hideAccuracyCircle(st.activePin);
   st.activePin.remove();
   hideToolbar();
+  refreshCompass();
   refreshAccuracyCircles();
 });
 
