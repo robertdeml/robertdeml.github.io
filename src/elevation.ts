@@ -71,14 +71,17 @@ function renderChart(data: ChartDatum[]) {
   if (_svgEl) _svgEl.remove();
   _svgEl = document.createElementNS(ns, "svg");
   _svgEl.style.cssText = "display:block;width:100%;height:100%;";
-  _svgEl.setAttribute("viewBox", "0 0 100 100");
+  const containerRect = container.getBoundingClientRect();
+  const vbH = 100;
+  const vbW = Math.max(vbH, Math.round(vbH * containerRect.width / containerRect.height));
+  _svgEl.setAttribute("viewBox", `0 0 ${vbW} ${vbH}`);
   _svgEl.setAttribute("preserveAspectRatio", "none");
   container.appendChild(_svgEl);
 
   // Crosshair line (drawn once, moved on hover)
   _crosshair = document.createElementNS(ns, "line");
   _crosshair.setAttribute("y1", "0");
-  _crosshair.setAttribute("y2", "100");
+  _crosshair.setAttribute("y2", vbH.toString());
   _crosshair.style.stroke = "rgba(255,255,255,0.7)";
   _crosshair.style.strokeWidth = "1";
   _crosshair.style.display = "none";
@@ -88,8 +91,8 @@ function renderChart(data: ChartDatum[]) {
 
   // Axis padding in viewBox units
   const padL = 8, padR = 4, padT = 6, padB = 12;
-  const plotW = 100 - padL - padR;
-  const plotH = 100 - padT - padB;
+  const plotW = vbW - padL - padR;
+  const plotH = vbH - padT - padB;
 
   const minAlt = Math.min(...data.map((d) => d.alt));
   const maxAlt = Math.max(...data.map((d) => d.alt));
@@ -123,10 +126,10 @@ function renderChart(data: ChartDatum[]) {
     _svgEl!.appendChild(t);
   }
 
-  makeLabel(padL, 98, formatDist(0), "start");
-  makeLabel(100 - padR, 98, formatDist(maxDist), "end");
-  makeLabel(padL, padT - 1, `${minAlt.toFixed(0)}m`, "start");
-  makeLabel(padL, 100 - padB + 1, `${maxAlt.toFixed(0)}m`, "start");
+  makeLabel(padL, vbH - 2, formatDist(0), "start");
+  makeLabel(vbW - padR, vbH - 2, formatDist(maxDist), "end");
+  makeLabel(padL, padT - 1, `${maxAlt.toFixed(0)}m`, "start");
+  makeLabel(padL, vbH - padB + 1, `${minAlt.toFixed(0)}m`, "start");
 
   /* ── Hover ──────────────────────────────────────────── */
   _svgEl.onmousemove = (e: MouseEvent) => {
