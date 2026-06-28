@@ -219,7 +219,11 @@ document.getElementById("clearFpBtn")?.addEventListener("click", () => {
 });
 
 /* --- Replay trail button --- */
-document.getElementById("replayBtn")?.addEventListener("click", startReplay);
+document.getElementById("replayBtn")?.addEventListener("click", () => {
+  panel?.classList.remove("open");
+  overlay?.classList.remove("open");
+  startReplay();
+});
 
 /* --- Top stop button while replaying --- */
 document.getElementById("replayTopBtn")?.addEventListener("click", stopReplay);

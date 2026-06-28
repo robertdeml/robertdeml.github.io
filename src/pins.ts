@@ -562,6 +562,8 @@ export function startReplay() {
 
   const topBtn = document.getElementById("replayTopBtn");
   if (topBtn) topBtn.style.display = "flex";
+  const statusEl = document.getElementById("replayStatus");
+  if (statusEl) statusEl.style.display = "block";
 
   // Show the first footprint immediately
   replayTick();
@@ -586,6 +588,8 @@ export function stopReplay() {
 
   const topBtn = document.getElementById("replayTopBtn");
   if (topBtn) topBtn.style.display = "none";
+  const statusEl = document.getElementById("replayStatus");
+  if (statusEl) statusEl.style.display = "none";
 }
 
 /* ============================================================
