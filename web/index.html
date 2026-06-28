@@ -57,7 +57,7 @@
         <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" />
         <button id="mapBtn" title="Map mode"><span data-lucide="map"></span></button>
         <button id="compassBtn" class="hidden" title="GPS"><span data-lucide="satellite"></span></button>
-        <button id="rotationBtn" title="Rotate" disabled><span data-lucide="rotate-ccw"></span></button>
+        <button id="rotationBtn" title="Rotate" disabled style="position:relative"><span data-lucide="rotate-ccw"></span><span data-lucide="map" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;opacity:0.85;pointer-events:none"></span></button>
       </div>
       <div class="menu-level">
         <button id="elevationBtn" title="Elevation profile"><span data-lucide="mountain"></span></button>
