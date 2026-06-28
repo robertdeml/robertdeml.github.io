@@ -1,5 +1,5 @@
 import { getTransformCoeffs, getMetersPerDeg } from "./transform.js";
-import { st, pinContainer } from "./state.js";
+import { st, pinContainer, noRefMsg } from "./state.js";
 
 const SCALE_BAR_ID = "mapScaleBar";
 
@@ -19,7 +19,7 @@ function formatScaleValue(v: number): string {
   return v % 1 === 0 ? v.toString() : parseFloat(v.toFixed(4)).toString();
 }
 
-function countRefPins(): number {
+export function countRefPins(): number {
   return pinContainer.querySelectorAll<SVGElement>('svg[data-lat]:not([data-type="footprint"])').length;
 }
 
@@ -40,8 +40,17 @@ export function refreshScaleBar(): void {
 
   if (!hasPhoto) {
     if (el) el.style.display = "none";
+    noRefMsg.style.display = "none";
     return;
   }
+
+  if (nPins === 0) {
+    if (el) el.style.display = "none";
+    noRefMsg.style.display = "block";
+    return;
+  }
+
+  noRefMsg.style.display = "none";
 
   let s: number;
   let refLat: number;

@@ -1,5 +1,6 @@
 import { st } from "./state.js";
 import { getTransformCoeffs } from "./transform.js";
+import { countRefPins } from "./scale.js";
 
 const COMPASS_ID = "mapCompass";
 
@@ -10,6 +11,11 @@ export function refreshCompass(): void {
   const hasPhoto = !!st.originalImage;
 
   if (!hasGps || !hasPhoto) {
+    if (el) el.style.display = "none";
+    return;
+  }
+
+  if (hasPhoto && countRefPins() === 0) {
     if (el) el.style.display = "none";
     return;
   }

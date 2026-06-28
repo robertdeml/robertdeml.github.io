@@ -100,3 +100,24 @@ statusEl.id = "gpsStatus";
 statusEl.style.cssText =
   "position:fixed;bottom:8px;left:8px;color:#FF5A00;font-family:monospace;font-size:14px;z-index:10;background:rgba(0,0,0,0.6);padding:4px 8px;border-radius:4px;display:none;";
 document.body.appendChild(statusEl);
+
+export const noRefMsg = document.createElement("div");
+noRefMsg.id = "noRefMsg";
+noRefMsg.textContent = "Place a reference point to mark your location";
+noRefMsg.style.cssText = [
+  "position:fixed",
+  "top:50%",
+  "left:50%",
+  "transform:translate(-50%,-50%)",
+  "color:#FF5A00",
+  "font-family:monospace",
+  "font-size:16px",
+  "z-index:10",
+  "background:rgba(0,0,0,0.7)",
+  "padding:12px 20px",
+  "border-radius:8px",
+  "text-align:center",
+  "display:none",
+  "pointer-events:none",
+].join(";");
+document.body.appendChild(noRefMsg);

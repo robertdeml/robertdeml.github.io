@@ -52,27 +52,63 @@ export function getTransformCoeffs() {
   return { a: sumA / sumW, b: sumB / sumW, p0 };
 }
 
+/** Default scale (pixels-per-degree) fallback when only 1 ref pin exists.
+ *  Uses the same heuristic as the scale bar: assumes the viewport's long
+ *  edge spans ~0.25 miles at the reference latitude. */
+function defaultScale(refLat: number): number {
+  const { mPerDegLat } = getMetersPerDeg(refLat);
+  const longEdgePx = Math.max(window.innerWidth, window.innerHeight);
+  const targetMiles = 1.0;
+  return (mPerDegLat * longEdgePx) / (targetMiles * 1609.344);
+}
+
 /** Converts (lat,lng) to pixel (x,y) via the affine transform.
- *  Returns null when the transform isn't ready (<2 reference pins). */
+ *  Returns null when no reference pins exist.
+ *  With exactly 1 pin, uses a default scale and north-up projection. */
 export function gpsToPixel(lat: number, lng: number) {
   const coeffs = getTransformCoeffs();
-  if (!coeffs) return null;
-  const { a, b, p0 } = coeffs;
-  const dLat = lat - p0.lat;
-  const dLng = lng - p0.lng;
-  return {
-    x: p0.x + a * dLat - b * dLng,
-    y: p0.y + b * dLat + a * dLng,
-  };
+
+  if (coeffs) {
+    const { a, b, p0 } = coeffs;
+    const dLat = lat - p0.lat;
+    const dLng = lng - p0.lng;
+    return {
+      x: p0.x + a * dLat - b * dLng,
+      y: p0.y + b * dLat + a * dLng,
+    };
+  }
+
+  const refs = getRefPins();
+  if (refs.length === 1) {
+    const p0 = refs[0];
+    const dLat = lat - p0.lat;
+    const dLng = lng - p0.lng;
+    const s = defaultScale(p0.lat);
+    return {
+      x: p0.x + s * dLng,
+      y: p0.y - s * dLat,
+    };
+  }
+
+  return null;
 }
 
 /** Converts GPS accuracy (meters) to a pixel radius on screen.
- *  Capped at MAX_ACC_RADIUS_PX to prevent over-sized circles. */
+ *  Capped at MAX_ACC_RADIUS_PX to prevent over-sized circles.
+ *  Falls back to the default 1-pin scale when no affine transform is ready. */
 export function accToPixelRadius(accMeters: number): number {
   const coeffs = getTransformCoeffs();
-  if (!coeffs) return 10;
-  const { a, b } = coeffs;
-  const radius = (Math.sqrt(a * a + b * b) * accMeters) / 111320;
+  let s: number;
+
+  if (coeffs) {
+    s = Math.sqrt(coeffs.a * coeffs.a + coeffs.b * coeffs.b);
+  } else {
+    const refs = getRefPins();
+    if (refs.length === 0) return 10;
+    s = defaultScale(refs[0].lat);
+  }
+
+  const radius = (s * accMeters) / 111320;
   return Math.min(radius, MAX_ACC_RADIUS_PX);
 }
 
