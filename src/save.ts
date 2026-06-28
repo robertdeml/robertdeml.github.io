@@ -85,6 +85,9 @@ export function autoSave() {
   const data = collectSaveData();
   try {
     localStorage.setItem(DATA_KEY, JSON.stringify(data));
+    if (st.originalImage) {
+      localStorage.setItem(IMAGE_KEY, JSON.stringify({ data: st.originalImage }));
+    }
   } catch {
     // silent fail for autosave
   }
